@@ -90,25 +90,27 @@
     return (CGRectGetWidth(self.view.frame) / image.size.width) * image.size.height;
 }
 
-/*
-// Override to support conditional editing of the table view.
+//optional method
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath {
-    // Return NO if you do not want the specified item to be editable.
+    
     return YES;
 }
-*/
 
-/*
-// Override to support editing the table view.
+
+//optional method
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath {
+    
     if (editingStyle == UITableViewCellEditingStyleDelete) {
-        // Delete the row from the data source
-        [tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationFade];
+        //delete row from array
+        [self.images removeObjectAtIndex:indexPath.row];
+        [tableView reloadData];
+        // Delete the row from the tableview data source
+        //[tableView deleteRowsAtIndexPaths:self.images[indexPath.row] withRowAnimation:UITableViewRowAnimationFade];
     } else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-    }   
+    }
 }
-*/
+
 
 /*
 // Override to support rearranging the table view.
