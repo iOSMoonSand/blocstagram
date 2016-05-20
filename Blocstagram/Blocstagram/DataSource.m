@@ -56,6 +56,11 @@
     [mutableArrayWithKVO removeObject:item];
 }
 
+- (void) insertMediaItem:(Media *)item {
+    NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
+    [mutableArrayWithKVO insertObject:item atIndex:0];
+}
+
 
 #pragma mark -
 
