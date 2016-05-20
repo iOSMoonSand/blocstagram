@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5EA681631CEF6654007136CA /* MediaTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EA681621CEF6654007136CA /* MediaTableViewCell.m */; };
 		5EF2417C1CED20E0003EA782 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EF2417B1CED20DF003EA782 /* main.m */; };
 		5EF2417F1CED20E0003EA782 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EF2417E1CED20E0003EA782 /* AppDelegate.m */; };
 		5EF241871CED20E0003EA782 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5EF241861CED20E0003EA782 /* Assets.xcassets */; };
@@ -29,6 +30,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5EA681611CEF6654007136CA /* MediaTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaTableViewCell.h; sourceTree = "<group>"; };
+		5EA681621CEF6654007136CA /* MediaTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediaTableViewCell.m; sourceTree = "<group>"; };
 		5EF241771CED20DF003EA782 /* Blocstagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blocstagram.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5EF2417B1CED20DF003EA782 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		5EF2417D1CED20E0003EA782 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -93,6 +96,8 @@
 				5EF2417E1CED20E0003EA782 /* AppDelegate.m */,
 				5EF241AD1CED271B003EA782 /* ImagesTableViewController.h */,
 				5EF241AE1CED271B003EA782 /* ImagesTableViewController.m */,
+				5EA681611CEF6654007136CA /* MediaTableViewCell.h */,
+				5EA681621CEF6654007136CA /* MediaTableViewCell.m */,
 				5EF241B91CEE7975003EA782 /* DataSource.h */,
 				5EF241BA1CEE7975003EA782 /* DataSource.m */,
 				5EF241B01CEE76AC003EA782 /* User.h */,
@@ -215,6 +220,7 @@
 			files = (
 				5EF241B21CEE76AC003EA782 /* User.m in Sources */,
 				5EF241B81CEE78C5003EA782 /* Comment.m in Sources */,
+				5EA681631CEF6654007136CA /* MediaTableViewCell.m in Sources */,
 				5EF241B51CEE7747003EA782 /* Media.m in Sources */,
 				5EF241AF1CED271B003EA782 /* ImagesTableViewController.m in Sources */,
 				5EF241BB1CEE7975003EA782 /* DataSource.m in Sources */,
