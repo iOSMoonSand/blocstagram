@@ -8,23 +8,27 @@
 
 #import "LoginViewController.h"
 #import "DataSource.h"
+#import <WebKit/WebKit.h>
 
-@interface LoginViewController () <UIWebViewDelegate>
+@interface LoginViewController () <UIWebViewDelegate, WKNavigationDelegate>
 
 @property (nonatomic, weak) UIWebView *webView;
+
+@property (nonatomic, strong) UIButton *backButton;
 
 @end
 
 @implementation LoginViewController
 
+
 NSString *const LoginViewControllerDidGetAccessTokenNotification = @"LoginViewControllerDidGetAccessTokenNotification";
 
-- (NSString *)redirectURI {
-    return @"http://www.bloc.io";
-}
 
+#pragma mark - UIViewController
+#pragma mark
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.edgesForExtendedLayout = UIRectEdgeNone;
     
     UIWebView *webView = [[UIWebView alloc] init];
     webView.delegate = self;
@@ -34,12 +38,20 @@ NSString *const LoginViewControllerDidGetAccessTokenNotification = @"LoginViewCo
     
     self.title = NSLocalizedString(@"Login", @"Login");
     
+    self.backButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [self.backButton setEnabled:NO];
+    
+    self.backButton.backgroundColor = [UIColor colorWithWhite:0.8 alpha:1];
+    
+    [self.backButton setTitle:NSLocalizedString(@"Back", @"Back command") forState:UIControlStateNormal];
+    [self.backButton addTarget:self.webView action:@selector(goBack) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.view addSubview:self.backButton];
+
+    
     NSString *urlString = [NSString stringWithFormat:@"https://instagram.com/oauth/authorize/?client_id=%@&redirect_uri=%@&response_type=token", [DataSource instagramClientID], [self redirectURI]];
     
-    //@"https://instagram.com/oauth/authorize/?client_id=%@&redirect_uri=%@&response_type=token",
-        //https://api.instagram.com/oauth/authorize/?client_id=%@&redirect_uri=%@&response_type=code
-        
-    NSURL *url = [NSURL URLWithString:urlString];
+        NSURL *url = [NSURL URLWithString:urlString];
     
     if (url) {
         NSURLRequest *request = [NSURLRequest requestWithURL:url];
@@ -48,20 +60,70 @@ NSString *const LoginViewControllerDidGetAccessTokenNotification = @"LoginViewCo
 }
 
 - (void) viewWillLayoutSubviews {
-    self.webView.frame = self.view.bounds;
+    
+    static const CGFloat itemHeight = 50;
+    CGFloat width = CGRectGetWidth(self.view.bounds);
+    CGFloat browserHeight = CGRectGetHeight(self.view.bounds) - itemHeight;
+    
+    self.backButton.frame = CGRectMake(0, 0, width, itemHeight);
+    self.webView.frame = CGRectMake(0, CGRectGetMaxY(self.backButton.frame), width, browserHeight);
+    
+    
 }
 
-- (void) dealloc {
-    // Removing this line can cause a flickering effect when you relaunch the app after logging in, as the web view is briefly displayed, automatically authenticates with cookies, returns the access token, and dismisses the login view, sometimes in less than a second.
-    [self clearInstagramCookies];
+- (NSString *)redirectURI {
+    return @"http://www.bloc.io";
+}
+
+
+#pragma mark - WebView Delegate methods
+#pragma mark
+- (BOOL) webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
+    NSString *urlString = request.URL.absoluteString;
+    NSLog(@"%@", request.URL.absoluteString);
+    if ([urlString hasPrefix:[self redirectURI]]) {
+        // This contains our auth token
+        NSRange rangeOfAccessTokenParameter = [urlString rangeOfString:@"access_token="];
+        NSUInteger indexOfTokenStarting = rangeOfAccessTokenParameter.location + rangeOfAccessTokenParameter.length;
+        NSString *accessToken = [urlString substringFromIndex:indexOfTokenStarting];
+        [[NSNotificationCenter defaultCenter] postNotificationName:LoginViewControllerDidGetAccessTokenNotification object:accessToken];
+        
+        [self updateButtonsAndTitle];
+        
+        return NO;
+    }
     
-    // see https://developer.apple.com/library/ios/documentation/uikit/reference/UIWebViewDelegate_Protocol/Reference/Reference.html#//apple_ref/doc/uid/TP40006951-CH3-DontLinkElementID_1
+    [self updateButtonsAndTitle];
+    
+    return YES;
+}
+
+- (void) updateButtonsAndTitle {
+    
+    self.backButton.enabled = [self.webView canGoBack];
+    
+}
+
+
+#pragma mark - WKNavigationDelegate methods
+#pragma mark
+
+- (void)webView:(WKWebView *)webView didStartProvisionalNavigation:(WKNavigation *)navigation {
+    [self updateButtonsAndTitle];
+}
+
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation {
+    [self updateButtonsAndTitle];
+}
+
+#pragma mark - Miscellaneous
+
+- (void) dealloc {
+    
+    [self clearInstagramCookies];
     self.webView.delegate = nil;
 }
 
-/**
- Clears Instagram cookies. This prevents caching the credentials in the cookie jar.
- */
 - (void) clearInstagramCookies {
     for(NSHTTPCookie *cookie in [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookies]) {
         NSRange domainRange = [cookie.domain rangeOfString:@"instagram.com"];
@@ -73,29 +135,7 @@ NSString *const LoginViewControllerDidGetAccessTokenNotification = @"LoginViewCo
 
 - (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
-#pragma mark - WebView Delegate methods
-
-- (BOOL) webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
-    NSString *urlString = request.URL.absoluteString;
-    NSLog(@"%@", request.URL.absoluteString);
-    if ([urlString hasPrefix:[self redirectURI]]) {
-        // This contains our auth token
-        NSRange rangeOfAccessTokenParameter = [urlString rangeOfString:@"access_token="];
-        NSUInteger indexOfTokenStarting = rangeOfAccessTokenParameter.location + rangeOfAccessTokenParameter.length;
-        NSString *accessToken = [urlString substringFromIndex:indexOfTokenStarting];
-        [[NSNotificationCenter defaultCenter] postNotificationName:LoginViewControllerDidGetAccessTokenNotification object:accessToken];
-        
-        return NO;
-    }
     
-    return YES;
 }
-
-//- (void)webViewDidFinishLoad:(UIWebView *)webView {
-//    NSLog(@"%@", webView.);
-//}
 
 @end
