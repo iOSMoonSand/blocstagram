@@ -35,7 +35,7 @@
 
 #pragma mark - init methods
 #pragma mark
-// single/shared instance of the DataSource: Singleton pattern
+// single/shared instance of the DataSource: Singleton pattern.
 
 + (instancetype) sharedInstance {
     static dispatch_once_t once;
