@@ -100,7 +100,7 @@
 }
 
 
-#pragma mark - NSKeyedArchiver from NSCoding
+#pragma mark - NSKeyedArchiver from NSCoding items
 #pragma mark
 
 - (NSString *) pathForFilename:(NSString *) filename {
