@@ -33,18 +33,9 @@ static NSParagraphStyle *paragraphStyle;
 
 @implementation MediaTableViewCell
 
-+ (CGFloat) heightForMediaItem:(Media *)mediaItem width:(CGFloat)width {
-    // Make a cell
-    MediaTableViewCell *layoutCell = [[MediaTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"layoutCell"];
-    
-    layoutCell.frame = CGRectMake(0, 0, width, CGRectGetHeight(layoutCell.frame));
-    
-    [layoutCell setNeedsLayout];
-    [layoutCell layoutIfNeeded];
-    
-    // Get the actual height required for the cell
-    return CGRectGetMaxY(layoutCell.commentLabel.frame);
-}
+
+#pragma mark - init and view load
+#pragma mark
 
 + (void)load {
     lightFont = [UIFont fontWithName:@"HelveticaNeue-Thin" size:11];
@@ -125,6 +116,22 @@ static NSParagraphStyle *paragraphStyle;
     return self;
 }
 
+#pragma mark - Table View Layout Cell
+#pragma mark
+
++ (CGFloat) heightForMediaItem:(Media *)mediaItem width:(CGFloat)width {
+    // Make a cell
+    MediaTableViewCell *layoutCell = [[MediaTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"layoutCell"];
+    
+    layoutCell.frame = CGRectMake(0, 0, width, CGRectGetHeight(layoutCell.frame));
+    
+    [layoutCell setNeedsLayout];
+    [layoutCell layoutIfNeeded];
+    
+    // Get the actual height required for the cell
+    return CGRectGetMaxY(layoutCell.commentLabel.frame);
+}
+
 - (void)setHighlighted:(BOOL)highlighted animated:(BOOL)animated {
     [super setHighlighted:NO animated:animated];
 }
@@ -134,6 +141,9 @@ static NSParagraphStyle *paragraphStyle;
 
     // Configure the view for the selected state
 }
+
+#pragma mark - Username, Caption & Comment Formatting
+#pragma mark
 
 - (NSAttributedString *) usernameAndCaptionString {
     // #1
@@ -173,6 +183,9 @@ static NSParagraphStyle *paragraphStyle;
     
     return commentString;
 }
+
+#pragma mark - Subview configuration
+#pragma mark
 
 - (void) layoutSubviews {
     [super layoutSubviews];
