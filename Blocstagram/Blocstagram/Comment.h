@@ -10,7 +10,7 @@
 
 @class User;
 
-@interface Comment : NSObject <NSCoding>
+@interface Comment : NSObject
 
 @property (nonatomic, strong) NSString *idNumber;
 
