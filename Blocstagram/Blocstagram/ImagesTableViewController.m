@@ -200,6 +200,12 @@
     }
 }
 
+#pragma mark - add05
+- (void) cell:(MediaTableViewCell *)cell didtwoFingerTapImageView:(UIImageView *)imageView {
+    
+    [[DataSource sharedInstance] requestNewItemsWithCompletionHandler:nil];
+}
+
 
 #pragma mark - Misc
 #pragma mark

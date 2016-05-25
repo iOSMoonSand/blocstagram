@@ -19,6 +19,9 @@
 //protocol's delegate method to trigger a share sheet if the user long-presses on an image
 - (void) cell:(MediaTableViewCell *)cell didLongPressImageView:(UIImageView *)imageView;
 
+#pragma mark - add01
+- (void) cell:(MediaTableViewCell *)cell didtwoFingerTapImageView:(UIImageView *)imageView;
+
 @end
 
 @interface MediaTableViewCell : UITableViewCell
