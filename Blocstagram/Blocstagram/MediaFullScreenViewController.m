@@ -9,9 +9,15 @@
 #import "MediaFullScreenViewController.h"
 #import "Media.h"
 
+#pragma mark - add05
+#import "MediaTableViewCell.m"
+
 @interface MediaFullScreenViewController () <UIScrollViewDelegate>
 
 @property (nonatomic, strong) Media *media; //property to store Media items
+
+#pragma mark - add01
+@property (nonatomic, strong) UIButton *shareButton;
 
 @end
 
@@ -22,8 +28,30 @@
 #pragma mark
 
 //set up the scroll view and image view
+
+- (instancetype) initWithMedia:(Media *)media {
+    self = [super init];
+    
+    //store the media item for later use
+    if (self) {
+        self.media = media;
+    }
+    
+    return self;
+}
+
+//make sure the image starts out centered
+- (void) viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    [self centerScrollView];
+}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    #pragma mark - add02
+    self.edgesForExtendedLayout = UIRectEdgeNone;
     
     // #1 create and configure a scroll view, and add it as the only subview of self.view
     self.scrollView = [UIScrollView new];
@@ -37,6 +65,14 @@
     self.imageView.image = self.media.image;
     
     [self.scrollView addSubview:self.imageView];
+    #pragma mark - add04
+    self.shareButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    [self.shareButton setEnabled:NO];
+    
+    [self.shareButton setTitle:NSLocalizedString(@"Share", @"Share command") forState:UIControlStateNormal];
+    [self.shareButton addTarget:self.scrollView action:@selector(longPressFired) forControlEvents:UIControlEventTouchUpInside];
+    
+    [self.scrollView addSubview:self.shareButton];
     
     // #3 contentSize represents the size of the content view, which is the content being scrolled around. In our case, we're simply scrolling around an image, so we'll pass in its size.
     self.scrollView.contentSize = self.media.image.size;
@@ -51,6 +87,7 @@
     
     [self.scrollView addGestureRecognizer:self.tap];
     [self.scrollView addGestureRecognizer:self.doubleTap];
+    
 }
 
 - (void) viewWillLayoutSubviews {
@@ -70,24 +107,16 @@
     //maximumZoomScale will always be 1 (representing 100%). We could make this bigger, but then the image would get pixelated if the user zooms in too much.
     self.scrollView.minimumZoomScale = minScale;
     self.scrollView.maximumZoomScale = 1;
-}
-
-- (instancetype) initWithMedia:(Media *)media {
-    self = [super init];
     
-    //store the media item for later use
-    if (self) {
-        self.media = media;
-    }
+    #pragma mark - add03
+    static const CGFloat itemHeight = 60;
+    CGFloat width = CGRectGetWidth(self.imageView.bounds);
+    CGFloat buttonWidth = CGRectGetWidth(self.imageView.bounds) / 4;
+    CGFloat imageViewHeight = CGRectGetHeight(self.scrollView.bounds) - itemHeight;
     
-    return self;
-}
-
-//make sure the image starts out centered
-- (void) viewWillAppear:(BOOL)animated {
-    [super viewWillAppear:animated];
-    
-    [self centerScrollView];
+    // Now, assign the frames
+    self.shareButton.frame = CGRectMake(250, 0, buttonWidth, itemHeight);
+    self.imageView.frame = CGRectMake(0, CGRectGetMaxY(self.shareButton.frame), width, imageViewHeight);
 }
 
 
