@@ -11,7 +11,7 @@
 #import "Comment.h"
 #import "User.h"
 
-@interface MediaTableViewCell ()
+@interface MediaTableViewCell () <UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) UIImageView *mediaImageView;
 @property (nonatomic, strong) UILabel *usernameAndCaptionLabel;
@@ -20,6 +20,8 @@
 @property (nonatomic, strong) NSLayoutConstraint *imageHeightConstraint;
 @property (nonatomic, strong) NSLayoutConstraint *usernameAndCaptionLabelHeightConstraint;
 @property (nonatomic, strong) NSLayoutConstraint *commentLabelHeightConstraint;
+
+@property (nonatomic, strong) UITapGestureRecognizer *tapGestureRecognizer;
 
 @end
 
@@ -32,6 +34,20 @@ static UIColor *linkColor;
 static NSParagraphStyle *paragraphStyle;
 
 @implementation MediaTableViewCell
+
+#pragma mark - Image View
+
+//tap gesture method when user taps an the image view
+- (void) tapFired:(UITapGestureRecognizer *)sender {
+    [self.delegate cell:self didTapImageView:self.mediaImageView];
+}
+
+#pragma mark - UIGestureRecognizerDelegate
+
+//if in editing mode to delete image and user taps on image hide the delete button, don't zoom in
+- (BOOL) gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch {
+    return self.isEditing == NO;
+}
 
 + (CGFloat) heightForMediaItem:(Media *)mediaItem width:(CGFloat)width {
     // Make a cell
@@ -68,6 +84,14 @@ static NSParagraphStyle *paragraphStyle;
     if (self) {
         // Initialization code
         self.mediaImageView = [[UIImageView alloc] init];
+        
+        self.mediaImageView.userInteractionEnabled = YES;
+        
+        //tap geture recognizer in the image view
+        self.tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapFired:)];
+        self.tapGestureRecognizer.delegate = self;
+        [self.mediaImageView addGestureRecognizer:self.tapGestureRecognizer];
+        
         self.usernameAndCaptionLabel = [[UILabel alloc] init];
         self.usernameAndCaptionLabel.numberOfLines = 0;
         self.usernameAndCaptionLabel.backgroundColor = usernameLabelGray;
