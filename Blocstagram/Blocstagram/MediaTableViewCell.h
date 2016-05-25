@@ -13,8 +13,11 @@
 
 @protocol MediaTableViewCellDelegate <NSObject>
 
-- (void) cell:(MediaTableViewCell *)cell didTapImageView:(UIImageView *)imageView;
 //protocol's delegate method which will inform the cell's controller when the user taps on the image
+- (void) cell:(MediaTableViewCell *)cell didTapImageView:(UIImageView *)imageView;
+
+//protocol's delegate method to trigger a share sheet if the user long-presses on an image
+- (void) cell:(MediaTableViewCell *)cell didLongPressImageView:(UIImageView *)imageView;
 
 @end
 

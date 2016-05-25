@@ -91,7 +91,7 @@
 }
 
 
-#pragma mark - center srcoll view
+#pragma mark - center scroll view
 #pragma mark
 
 //If the image is zoomed out so it doesn't fill the full scroll view, this method will center the image on the appropriate axis.
@@ -130,14 +130,6 @@
     [self centerScrollView];
 }
 
-#pragma mark - Misc
-#pragma mark
-
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
-}
-
 
 #pragma mark - Gesture Recognizers
 #pragma mark
@@ -165,6 +157,15 @@
         // #9 If the current zoom scale is larger then zoom out to the minimum scale.
         [self.scrollView setZoomScale:self.scrollView.minimumZoomScale animated:YES];
     }
+}
+
+
+#pragma mark - Misc
+#pragma mark
+
+- (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
 }
 
 

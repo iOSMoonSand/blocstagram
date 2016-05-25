@@ -32,46 +32,76 @@
 
 @implementation DataSource
 
-- (NSString *) pathForFilename:(NSString *) filename {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths firstObject];
-    NSString *dataPath = [documentsDirectory stringByAppendingPathComponent:filename];
-    return dataPath;
+
+#pragma mark - single init / shared instance
+#pragma mark
+
++ (instancetype) sharedInstance {
+    static dispatch_once_t once;
+    static id sharedInstance;
+    dispatch_once(&once, ^{
+        sharedInstance = [[self alloc] init];
+    });
+    return sharedInstance;
 }
+
+- (instancetype) init {
+    self = [super init];
+    
+    if (self) {
+        self.accessToken = [UICKeyChainStore stringForKey:@"access token"];
+        
+        if (!self.accessToken) {
+            [self registerForAccessTokenNotification];
+        } else {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                NSString *fullPath = [self pathForFilename:NSStringFromSelector(@selector(mediaItems))];
+                NSArray *storedMediaItems = [NSKeyedUnarchiver unarchiveObjectWithFile:fullPath];
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    if (storedMediaItems.count > 0) {
+                        NSMutableArray *mutableMediaItems = [storedMediaItems mutableCopy];
+                        
+                        [self willChangeValueForKey:@"mediaItems"];
+                        self.mediaItems = mutableMediaItems;
+                        [self didChangeValueForKey:@"mediaItems"];
+                        
+                        for (Media* mediaItem in self.mediaItems) {
+                            [self downloadImageForMediaItem:mediaItem];
+                        }
+                        
+                    } else {
+                        [self populateDataWithParameters:nil completionHandler:nil];
+                    }
+                });
+            });
+        }
+    }
+    
+    return self;
+}
+
+
+#pragma mark - Instagram Authentication
+#pragma mark
 
 + (NSString *) instagramClientID {
     return @"48e7832219ab46a7897b545e205bbe7b";
 }
 
-- (void) downloadImageForMediaItem:(Media *)mediaItem {
-    if (mediaItem.mediaURL && !mediaItem.image) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSURLRequest *request = [NSURLRequest requestWithURL:mediaItem.mediaURL];
-            
-            NSURLResponse *response;
-            NSError *error;
-            NSData *imageData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-            
-            if (imageData) {
-                UIImage *image = [UIImage imageWithData:imageData];
-                
-                if (image) {
-                    mediaItem.image = image;
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
-                        NSUInteger index = [mutableArrayWithKVO indexOfObject:mediaItem];
-                        [mutableArrayWithKVO replaceObjectAtIndex:index withObject:mediaItem];
-                        
-                        [self saveImages];
-                    });
-                }
-            } else {
-                NSLog(@"Error downloading image: %@", error);
-            }
-        });
-    }
+- (void) registerForAccessTokenNotification {
+    [[NSNotificationCenter defaultCenter] addObserverForName:LoginViewControllerDidGetAccessTokenNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+        self.accessToken = note.object;
+        [UICKeyChainStore setString:self.accessToken forKey:@"access token"];
+        
+        // Got a token; populate the initial data
+        [self populateDataWithParameters:nil completionHandler:nil];
+    }];
 }
+
+
+#pragma mark - DataSource JSON parse, populate, download images
+#pragma mark
 
 - (void) populateDataWithParameters:(NSDictionary *)parameters completionHandler:(NewItemCompletionBlock)completionHandler {
     if (self.accessToken) {
@@ -166,6 +196,132 @@
     [self saveImages];
 }
 
+- (void) downloadImageForMediaItem:(Media *)mediaItem {
+    if (mediaItem.mediaURL && !mediaItem.image) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSURLRequest *request = [NSURLRequest requestWithURL:mediaItem.mediaURL];
+            
+            NSURLResponse *response;
+            NSError *error;
+            NSData *imageData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
+            
+            if (imageData) {
+                UIImage *image = [UIImage imageWithData:imageData];
+                
+                if (image) {
+                    mediaItem.image = image;
+                    
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
+                        NSUInteger index = [mutableArrayWithKVO indexOfObject:mediaItem];
+                        [mutableArrayWithKVO replaceObjectAtIndex:index withObject:mediaItem];
+                        
+                        [self saveImages];
+                    });
+                }
+            } else {
+                NSLog(@"Error downloading image: %@", error);
+            }
+        });
+    }
+}
+
+
+#pragma mark - Key/Value Observe & Response methods
+#pragma mark
+
+//observe methods
+- (NSUInteger) countOfMediaItems {
+    return self.mediaItems.count;
+}
+
+- (id) objectInMediaItemsAtIndex:(NSUInteger)index {
+    return [self.mediaItems objectAtIndex:index];
+}
+
+- (NSArray *) mediaItemsAtIndexes:(NSIndexSet *)indexes {
+    return [self.mediaItems objectsAtIndexes:indexes];
+}
+
+//response methods
+- (void) insertObject:(Media *)object inMediaItemsAtIndex:(NSUInteger)index {
+    [_mediaItems insertObject:object atIndex:index];
+}
+
+- (void) removeObjectFromMediaItemsAtIndex:(NSUInteger)index {
+    [_mediaItems removeObjectAtIndex:index];
+}
+
+- (void) replaceObjectInMediaItemsAtIndex:(NSUInteger)index withObject:(id)object {
+    [_mediaItems replaceObjectAtIndex:index withObject:object];
+}
+
+- (void) deleteMediaItem:(Media *)item {
+    NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
+    [mutableArrayWithKVO removeObject:item];
+}
+
+#pragma mark - Completion Handling Refresh & Infinite Scroll
+#pragma mark
+
+//Refresh Scroll
+- (void) requestNewItemsWithCompletionHandler:(NewItemCompletionBlock)completionHandler {
+    
+    self.thereAreNoMoreOlderMessages = NO;
+    
+    if (self.isRefreshing == NO) {
+        self.isRefreshing = YES;
+        
+        NSString *minID = [[self.mediaItems firstObject] idNumber];
+        NSDictionary *parameters;
+        
+        if (minID) {
+            parameters = @{@"min_id": minID};
+        }
+        
+        [self populateDataWithParameters:parameters completionHandler:^(NSError *error) {
+            self.isRefreshing = NO;
+            
+            if (completionHandler) {
+                completionHandler(error);
+            }
+        }];   completionHandler(nil);
+    }
+}
+
+//Infinite Scroll
+- (void) requestOldItemsWithCompletionHandler:(NewItemCompletionBlock)completionHandler {
+    if (self.isLoadingOlderItems == NO && self.thereAreNoMoreOlderMessages == NO) {
+        
+        self.isLoadingOlderItems = YES;
+        
+        NSString *maxID = [[self.mediaItems lastObject] idNumber];
+        NSDictionary *parameters;
+        
+        if (maxID) {
+            parameters = @{@"max_id": maxID};
+        }
+        
+        [self populateDataWithParameters:parameters completionHandler:^(NSError *error) {
+            self.isLoadingOlderItems = NO;
+            if (completionHandler) {
+                completionHandler(error);
+            }
+        }];
+    }
+}
+
+
+#pragma mark - Data Persistence
+#pragma mark
+
+- (NSString *) pathForFilename:(NSString *) filename {
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths firstObject];
+    NSString *dataPath = [documentsDirectory stringByAppendingPathComponent:filename];
+    return dataPath;
+}
+
 - (void) saveImages {
     
     if (self.mediaItems.count > 0) {
@@ -186,147 +342,6 @@
         });
         
     }
-}
-
-#pragma mark - Key/Value Observing
-// getter methods
-
-- (NSUInteger) countOfMediaItems {
-    return self.mediaItems.count;
-}
-
-- (id) objectInMediaItemsAtIndex:(NSUInteger)index {
-    return [self.mediaItems objectAtIndex:index];
-}
-
-- (NSArray *) mediaItemsAtIndexes:(NSIndexSet *)indexes {
-    return [self.mediaItems objectsAtIndexes:indexes];
-}
-
-//setter methods
-
-- (void) insertObject:(Media *)object inMediaItemsAtIndex:(NSUInteger)index {
-    [_mediaItems insertObject:object atIndex:index];
-}
-
-- (void) removeObjectFromMediaItemsAtIndex:(NSUInteger)index {
-    [_mediaItems removeObjectAtIndex:index];
-}
-
-- (void) replaceObjectInMediaItemsAtIndex:(NSUInteger)index withObject:(id)object {
-    [_mediaItems replaceObjectAtIndex:index withObject:object];
-}
-
-- (void) deleteMediaItem:(Media *)item {
-    NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
-    [mutableArrayWithKVO removeObject:item];
-}
-
-#pragma mark - completion handling
-
-- (void) requestNewItemsWithCompletionHandler:(NewItemCompletionBlock)completionHandler {
-    
-    self.thereAreNoMoreOlderMessages = NO;
-
-    if (self.isRefreshing == NO) {
-        self.isRefreshing = YES;
-        
-        NSString *minID = [[self.mediaItems firstObject] idNumber];
-        NSDictionary *parameters;
-        
-        if (minID) {
-            parameters = @{@"min_id": minID};
-        }
-        
-        [self populateDataWithParameters:parameters completionHandler:^(NSError *error) {
-            self.isRefreshing = NO;
-            
-            if (completionHandler) {
-                completionHandler(error);
-            }
-        }];   completionHandler(nil);
-        }
-}
-
-#pragma mark - infinite scroll
-
-- (void) requestOldItemsWithCompletionHandler:(NewItemCompletionBlock)completionHandler {
-    if (self.isLoadingOlderItems == NO && self.thereAreNoMoreOlderMessages == NO) {
-
-        self.isLoadingOlderItems = YES;
-        
-        NSString *maxID = [[self.mediaItems lastObject] idNumber];
-        NSDictionary *parameters;
-        
-        if (maxID) {
-            parameters = @{@"max_id": maxID};
-        }
-        
-        [self populateDataWithParameters:parameters completionHandler:^(NSError *error) {
-            self.isLoadingOlderItems = NO;
-            if (completionHandler) {
-                completionHandler(error);
-            }
-        }];
-    }
-}
-
-
-#pragma mark -
-
-+ (instancetype) sharedInstance {
-    static dispatch_once_t once;
-    static id sharedInstance;
-    dispatch_once(&once, ^{
-        sharedInstance = [[self alloc] init];
-    });
-    return sharedInstance;
-}
-
-- (instancetype) init {
-    self = [super init];
-    
-    if (self) {
-        self.accessToken = [UICKeyChainStore stringForKey:@"access token"];
-        
-        if (!self.accessToken) {
-            [self registerForAccessTokenNotification];
-        } else {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                NSString *fullPath = [self pathForFilename:NSStringFromSelector(@selector(mediaItems))];
-                NSArray *storedMediaItems = [NSKeyedUnarchiver unarchiveObjectWithFile:fullPath];
-                
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (storedMediaItems.count > 0) {
-                        NSMutableArray *mutableMediaItems = [storedMediaItems mutableCopy];
-                        
-                        [self willChangeValueForKey:@"mediaItems"];
-                        self.mediaItems = mutableMediaItems;
-                        [self didChangeValueForKey:@"mediaItems"];
-                        
-                        for (Media* mediaItem in self.mediaItems) {
-                            [self downloadImageForMediaItem:mediaItem];
-                        }
-                        
-                    } else {
-                        [self populateDataWithParameters:nil completionHandler:nil];
-                    }
-                });
-            });
-        }
-    }
-    
-    return self;
-}
-
-- (void) registerForAccessTokenNotification {
-    [[NSNotificationCenter defaultCenter] addObserverForName:LoginViewControllerDidGetAccessTokenNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-        self.accessToken = note.object;
-        [UICKeyChainStore setString:self.accessToken forKey:@"access token"];
-        
-        // Got a token; populate the initial data
-        [self populateDataWithParameters:nil completionHandler:nil];
-    }];
 }
 
 @end
