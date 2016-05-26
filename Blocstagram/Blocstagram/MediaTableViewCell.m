@@ -80,7 +80,7 @@ static NSParagraphStyle *paragraphStyle;
         
         #pragma mark - add03
         self.twoFingerTapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(twoFingerTapFired:)];
-        [self.twoFingerTapGestureRecognizer setNumberOfTapsRequired:2];
+        self.twoFingerTapGestureRecognizer.numberOfTouchesRequired = 2;
         self.twoFingerTapGestureRecognizer.delegate = self;
         [self.mediaImageView addGestureRecognizer:self.twoFingerTapGestureRecognizer];
         
@@ -264,7 +264,8 @@ static NSParagraphStyle *paragraphStyle;
 
 #pragma mark - add04
 - (void) twoFingerTapFired:(UITapGestureRecognizer *)sender {
-    [self.delegate cell:self didtwoFingerTapImageView:self.mediaImageView];
+//    if (sender.state == UIGestureRecognizerStateEnded) {
+        [self.delegate cell:self didTwoFingerTapImageView:self.mediaImageView];
 }
 
 

@@ -20,7 +20,7 @@
 - (void) cell:(MediaTableViewCell *)cell didLongPressImageView:(UIImageView *)imageView;
 
 #pragma mark - add01
-- (void) cell:(MediaTableViewCell *)cell didtwoFingerTapImageView:(UIImageView *)imageView;
+- (void) cell:(MediaTableViewCell *)cell didTwoFingerTapImageView:(UIImageView *)imageView;
 
 @end
 

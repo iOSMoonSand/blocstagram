@@ -201,7 +201,7 @@
 }
 
 #pragma mark - add05
-- (void) cell:(MediaTableViewCell *)cell didtwoFingerTapImageView:(UIImageView *)imageView {
+- (void) cell:(MediaTableViewCell *)cell didTwoFingerTapImageView:(UIImageView *)imageView {
     
     [[DataSource sharedInstance] requestNewItemsWithCompletionHandler:nil];
 }
