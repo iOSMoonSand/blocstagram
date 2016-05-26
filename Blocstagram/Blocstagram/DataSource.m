@@ -73,11 +73,6 @@
                         [self willChangeValueForKey:@"mediaItems"];
                         self.mediaItems = mutableMediaItems;
                         [self didChangeValueForKey:@"mediaItems"];
-                        
-                        for (Media* mediaItem in self.mediaItems) {
-                            [self downloadImageForMediaItem:mediaItem];
-                        }
-                        
                     } else {
                         [self populateDataWithParameters:nil completionHandler:nil];
                     }
@@ -151,9 +146,7 @@
         
         if (mediaItem) {
             [tmpMediaItems addObject:mediaItem];
-            [self downloadImageForMediaItem:mediaItem];
         }
-    }
     
     NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
     
@@ -180,35 +173,53 @@
     }
     
     [self saveImages];
+    }
 }
 
 - (void) downloadImageForMediaItem:(Media *)mediaItem {
     if (mediaItem.mediaURL && !mediaItem.image) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSURLRequest *request = [NSURLRequest requestWithURL:mediaItem.mediaURL];
-            
-            NSURLResponse *response;
-            NSError *error;
-            NSData *imageData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-            
-            if (imageData) {
-                UIImage *image = [UIImage imageWithData:imageData];
-                
-                if (image) {
-                    mediaItem.image = image;
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
-                        NSUInteger index = [mutableArrayWithKVO indexOfObject:mediaItem];
-                        [mutableArrayWithKVO replaceObjectAtIndex:index withObject:mediaItem];
-                        
-                        [self saveImages];
-                    });
-                }
-            } else {
-                NSLog(@"Error downloading image: %@", error);
-            }
-        });
+        //set the download state to MediaDownloadStateDownloadInProgress when the download begins
+        mediaItem.downloadState = MediaDownloadStateDownloadInProgress;
+        
+        [self.instagramOperationManager GET:mediaItem.mediaURL.absoluteString
+                                 parameters:nil
+                                    success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                                        if ([responseObject isKindOfClass:[UIImage class]]) {
+                                            mediaItem.image = responseObject;
+                                            //Once the operation is complete, if the image was set successfully, the state becomes MediaDownloadStateHasImage
+                                            mediaItem.downloadState = MediaDownloadStateHasImage;
+                                            NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
+                                            NSUInteger index = [mutableArrayWithKVO indexOfObject:mediaItem];
+                                            [mutableArrayWithKVO replaceObjectAtIndex:index withObject:mediaItem];
+                                            [self saveImages];
+                                        } else {
+                                            mediaItem.downloadState = MediaDownloadStateNonRecoverableError;
+                                        }
+                                        
+                                    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                                        NSLog(@"Error downloading image: %@", error);
+                                        
+                                        //If there's any error, we set the download state to MediaDownloadStateNonRecoverableError
+                                        mediaItem.downloadState = MediaDownloadStateNonRecoverableError;
+                                        
+                                        //check for a series of recoverable errors like timeouts and connectivity issues. If one of these errors occurs, we set the download state to MediaDownloadStateNeedsImage instead
+                                        if ([error.domain isEqualToString:NSURLErrorDomain]) {
+                                            // A networking problem
+                                            if (error.code == NSURLErrorTimedOut ||
+                                                error.code == NSURLErrorCancelled ||
+                                                error.code == NSURLErrorCannotConnectToHost ||
+                                                error.code == NSURLErrorNetworkConnectionLost ||
+                                                error.code == NSURLErrorNotConnectedToInternet ||
+                                                error.code == kCFURLErrorInternationalRoamingOff ||
+                                                error.code == kCFURLErrorCallIsActive ||
+                                                error.code == kCFURLErrorDataNotAllowed ||
+                                                error.code == kCFURLErrorRequestBodyStreamExhausted) {
+                                                
+                                                // It might work if we try again
+                                                mediaItem.downloadState = MediaDownloadStateNeedsImage;
+                                            }
+                                        }
+                                    }];
     }
 }
 

@@ -23,6 +23,10 @@
         
         if (standardResolutionImageURL) {
             self.mediaURL = standardResolutionImageURL;
+            //set a default valueIf we hadn't set a default value, the default value would automatically be set to MediaDownloadStateNeedsImage. This is because properties that are simple types are initialized to 0 by default (similar to how objects are nil by default).
+            self.downloadState = MediaDownloadStateNeedsImage;
+        } else {
+            self.downloadState = MediaDownloadStateNonRecoverableError;
         }
         
         NSDictionary *captionDictionary = mediaDictionary[@"caption"];
@@ -59,6 +63,16 @@
         self.user = [aDecoder decodeObjectForKey:NSStringFromSelector(@selector(user))];
         self.mediaURL = [aDecoder decodeObjectForKey:NSStringFromSelector(@selector(mediaURL))];
         self.image = [aDecoder decodeObjectForKey:NSStringFromSelector(@selector(image))];
+        
+        //set self.downloadState. This way, after relaunching the app, saved media items will still have a download state.
+        if (self.image) {
+            self.downloadState = MediaDownloadStateHasImage;
+        } else if (self.mediaURL) {
+            self.downloadState = MediaDownloadStateNeedsImage;
+        } else {
+            self.downloadState = MediaDownloadStateNonRecoverableError;
+        }
+        
         self.caption = [aDecoder decodeObjectForKey:NSStringFromSelector(@selector(caption))];
         self.comments = [aDecoder decodeObjectForKey:NSStringFromSelector(@selector(comments))];
     }

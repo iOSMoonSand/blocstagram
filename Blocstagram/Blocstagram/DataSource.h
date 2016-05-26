@@ -25,7 +25,9 @@ typedef void (^NewItemCompletionBlock)(NSError *error);
 - (void) deleteMediaItem:(Media *)item;
 
 - (void) requestNewItemsWithCompletionHandler:(NewItemCompletionBlock)completionHandler;
-
 - (void) requestOldItemsWithCompletionHandler:(NewItemCompletionBlock)completionHandler;
+
+//We want other classes to be able to request that images be downloaded so we make this method public in .h
+- (void) downloadImageForMediaItem:(Media *)mediaItem;
 
 @end

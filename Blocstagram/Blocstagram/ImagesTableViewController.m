@@ -200,6 +200,14 @@
     }
 }
 
+//Instead of downloading all the images as we get the media items, we'll check whether we need the images right before a cell displays. In the images table controller, implement tableView:willDisplayCell:forRowAtIndexPath:. According to the UITableViewDelegate Protocol Reference, a table view “sends this message to its delegate just before it uses cell to draw a row.”
+- (void) tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    Media *mediaItem = [DataSource sharedInstance].mediaItems[indexPath.row];
+    if (mediaItem.downloadState == MediaDownloadStateNeedsImage) {
+        [[DataSource sharedInstance] downloadImageForMediaItem:mediaItem];
+    }
+}
+
 
 #pragma mark - Misc
 #pragma mark
