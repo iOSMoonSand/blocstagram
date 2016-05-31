@@ -265,6 +265,7 @@ static NSParagraphStyle *paragraphStyle;
 #pragma mark - add04
 - (void) twoFingerTapFired:(UITapGestureRecognizer *)sender {
 //    if (sender.state == UIGestureRecognizerStateEnded) {
+    NSLog(@"method fired");
         [self.delegate cell:self didTwoFingerTapImageView:self.mediaImageView];
 }
 

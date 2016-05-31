@@ -203,9 +203,12 @@
 #pragma mark - add05
 - (void) cell:(MediaTableViewCell *)cell didTwoFingerTapImageView:(UIImageView *)imageView {
     
-    [[DataSource sharedInstance] requestNewItemsWithCompletionHandler:nil];
+    [[DataSource sharedInstance] requestNewItemsWithCompletionHandler: ^(NSError *error) {
+        if (error != nil) {
+            // tell the user it didn't work
+        }
+    }];
 }
-
 
 #pragma mark - Misc
 #pragma mark

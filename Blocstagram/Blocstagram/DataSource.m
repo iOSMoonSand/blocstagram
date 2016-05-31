@@ -184,31 +184,21 @@
 
 - (void) downloadImageForMediaItem:(Media *)mediaItem {
     if (mediaItem.mediaURL && !mediaItem.image) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSURLRequest *request = [NSURLRequest requestWithURL:mediaItem.mediaURL];
-            
-            NSURLResponse *response;
-            NSError *error;
-            NSData *imageData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-            
-            if (imageData) {
-                UIImage *image = [UIImage imageWithData:imageData];
-                
-                if (image) {
-                    mediaItem.image = image;
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
-                        NSUInteger index = [mutableArrayWithKVO indexOfObject:mediaItem];
-                        [mutableArrayWithKVO replaceObjectAtIndex:index withObject:mediaItem];
-                        
-                        [self saveImages];
-                    });
-                }
-            } else {
-                NSLog(@"Error downloading image: %@", error);
-            }
-        });
+        [self.instagramOperationManager GET:mediaItem.mediaURL.absoluteString
+                                 parameters:nil
+                                    success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                                        if ([responseObject isKindOfClass:[UIImage class]]) {
+                                            mediaItem.image = responseObject;
+                                            NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
+                                            NSUInteger index = [mutableArrayWithKVO indexOfObject:mediaItem];
+                                            [mutableArrayWithKVO replaceObjectAtIndex:index withObject:mediaItem];
+                                        }
+                                        
+                                        [self saveImages];
+                                        
+                                    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                                        NSLog(@"Error downloading image: %@", error);
+                                    }];
     }
 }
 
@@ -271,7 +261,7 @@
             if (completionHandler) {
                 completionHandler(error);
             }
-        }];   completionHandler(nil);
+        }];
     }
 }
 
