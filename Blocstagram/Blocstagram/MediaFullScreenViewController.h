@@ -10,9 +10,19 @@
 
 #import <UIKit/UIKit.h>
 
-@class Media;
+@class Media, MediaFullScreenViewController;
+
+// declare protocol
+@protocol MediaFullScreenViewControllerDelegate <NSObject>
+
+- (void)displayShareSheetWithImage:(UIImage *)image onViewController:(UIViewController *)viewController;
+
+@end
+
 
 @interface MediaFullScreenViewController : UIViewController
+
+@property (nonatomic, weak) id <MediaFullScreenViewControllerDelegate> delegate;
 
 @property (nonatomic, strong) UIScrollView *scrollView;
 @property (nonatomic, strong) UIImageView *imageView;

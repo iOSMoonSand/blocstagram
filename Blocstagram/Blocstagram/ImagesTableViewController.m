@@ -14,7 +14,7 @@
 #import "MediaTableViewCell.h"
 #import "MediaFullScreenViewController.h"
 
-@interface ImagesTableViewController () <MediaTableViewCellDelegate>
+@interface ImagesTableViewController () <MediaTableViewCellDelegate, MediaFullScreenViewControllerDelegate>
 
 @end
 
@@ -176,7 +176,7 @@
 
 - (void) cell:(MediaTableViewCell *)cell didTapImageView:(UIImageView *)imageView {
     MediaFullScreenViewController *fullScreenVC = [[MediaFullScreenViewController alloc] initWithMedia:cell.mediaItem];
-    
+    fullScreenVC.delegate = self;
     [self presentViewController:fullScreenVC animated:YES completion:nil];
 }
 
@@ -195,8 +195,7 @@
     
     //that array is presented
     if (itemsToShare.count > 0) {
-        UIActivityViewController *activityVC = [[UIActivityViewController alloc] initWithActivityItems:itemsToShare applicationActivities:nil];
-        [self presentViewController:activityVC animated:YES completion:nil];
+        [self displayShareActivityViewWithItemsToShare:itemsToShare onViewController:self];
     }
 }
 
@@ -208,6 +207,19 @@
     }
 }
 
+-(void)displayShareActivityViewWithItemsToShare:(NSMutableArray *)itemsToShare onViewController:(UIViewController *)viewController {
+
+    UIActivityViewController *activityVC = [[UIActivityViewController alloc] initWithActivityItems:itemsToShare applicationActivities:nil];
+    [viewController presentViewController:activityVC animated:YES completion:nil];
+}
+
+- (void)displayShareSheetWithImage:(UIImage *)image onViewController:(UIViewController *)viewController {
+    
+    NSLog(@"delegate mothod");
+    NSMutableArray *itemsToShare = [NSMutableArray arrayWithObject:image];
+    
+    [self displayShareActivityViewWithItemsToShare:itemsToShare onViewController:viewController];
+}
 
 #pragma mark - Misc
 #pragma mark
@@ -224,6 +236,19 @@
 
 
 
+
+#pragma mark - FullScreenVCDelegate
+
+/*
+ 
+ -(void)presentShareAction(){
+ 
+ // declare items to share or pass in nill
+ [self displayShareActivityViewWithItemsToShare:itemsToShare];
+ 
+ }
+ 
+ */
 
 
 
