@@ -9,9 +9,6 @@
 #import "MediaFullScreenViewController.h"
 #import "Media.h"
 
-#pragma mark - add05
-#import "MediaTableViewCell.m"
-
 @interface MediaFullScreenViewController () <UIScrollViewDelegate>
 
 @property (nonatomic, strong) Media *media; //property to store Media items
@@ -67,10 +64,10 @@
     [self.scrollView addSubview:self.imageView];
     #pragma mark - add04
     self.shareButton = [UIButton buttonWithType:UIButtonTypeSystem];
-    [self.shareButton setEnabled:NO];
+    [self.shareButton setEnabled:YES];
     
     [self.shareButton setTitle:NSLocalizedString(@"Share", @"Share command") forState:UIControlStateNormal];
-    [self.shareButton addTarget:self.scrollView action:@selector(longPressFired) forControlEvents:UIControlEventTouchUpInside];
+    [self.shareButton addTarget:self action:@selector(shareButtonFired:) forControlEvents:UIControlEventTouchUpInside];
     
     [self.scrollView addSubview:self.shareButton];
     
@@ -189,6 +186,17 @@
 }
 
 
+
+//share button pressed
+- (IBAction)shareButtonFired:(id)sender {
+    NSLog(@"button fired");
+       // call displayShareActivityViewWithItemsToShare: on delegate
+    [self.delegate displayShareSheetWithImage:self.media.image onViewController:self];
+
+}
+
+
+
 #pragma mark - Misc
 #pragma mark
 
@@ -196,12 +204,6 @@
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
-
-
-
-
-
-
 
 
 /*
