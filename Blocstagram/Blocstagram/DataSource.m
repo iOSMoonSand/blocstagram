@@ -115,7 +115,7 @@
     if (self.accessToken) {
         // only try to get the data if there's an access token
         
-        //create a parameters mutable dictionary for the access token
+        //create a parameters dictionary for the access token, and add in any other parameters that might be passed in (like min_id or max_id). The request operation manager gets the resource, and if it's successful, responseObject is passed to parseDataFromFeedDictionary:fromRequestWithParameters: for parsing.
         NSMutableDictionary *mutableParameters = [@{@"access_token": self.accessToken} mutableCopy];
         
         //add in any other parameters that might be passed in (like min_id or max_id)
@@ -184,31 +184,21 @@
 
 - (void) downloadImageForMediaItem:(Media *)mediaItem {
     if (mediaItem.mediaURL && !mediaItem.image) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSURLRequest *request = [NSURLRequest requestWithURL:mediaItem.mediaURL];
-            
-            NSURLResponse *response;
-            NSError *error;
-            NSData *imageData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-            
-            if (imageData) {
-                UIImage *image = [UIImage imageWithData:imageData];
-                
-                if (image) {
-                    mediaItem.image = image;
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
-                        NSUInteger index = [mutableArrayWithKVO indexOfObject:mediaItem];
-                        [mutableArrayWithKVO replaceObjectAtIndex:index withObject:mediaItem];
-                        
-                        [self saveImages];
-                    });
-                }
-            } else {
-                NSLog(@"Error downloading image: %@", error);
-            }
-        });
+        [self.instagramOperationManager GET:mediaItem.mediaURL.absoluteString
+                                 parameters:nil
+                                    success:^(AFHTTPRequestOperation *operation, id responseObject) {
+                                        if ([responseObject isKindOfClass:[UIImage class]]) {
+                                            mediaItem.image = responseObject;
+                                            NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
+                                            NSUInteger index = [mutableArrayWithKVO indexOfObject:mediaItem];
+                                            [mutableArrayWithKVO replaceObjectAtIndex:index withObject:mediaItem];
+                                        }
+                                        
+                                        [self saveImages];
+                                        
+                                    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                                        NSLog(@"Error downloading image: %@", error);
+                                    }];
     }
 }
 
@@ -303,6 +293,7 @@
 
 //method to initialize the operation manager
 - (void) createOperationManager {
+    //baseURL automatically prepended to any relative URLs we provide later
     NSURL *baseURL = [NSURL URLWithString:@"https://api.instagram.com/v1/"];
     self.instagramOperationManager = [[AFHTTPRequestOperationManager alloc] initWithBaseURL:baseURL];
     
@@ -311,6 +302,7 @@
     AFImageResponseSerializer *imageSerializer = [AFImageResponseSerializer serializer];
     imageSerializer.imageScale = 1.0;
     
+    //Since some requests return JSON and others return images, we create a AFCompoundResponseSerializer. This saves us from having to specify for each request the type of object we want. AFNetworking will figure it out automatically.
     AFCompoundResponseSerializer *serializer = [AFCompoundResponseSerializer compoundSerializerWithResponseSerializers:@[jsonSerializer, imageSerializer]];
     self.instagramOperationManager.responseSerializer = serializer;
 }
