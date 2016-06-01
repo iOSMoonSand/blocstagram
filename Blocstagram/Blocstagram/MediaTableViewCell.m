@@ -23,7 +23,8 @@
 static UIFont *lightFont;
 static UIFont *boldFont;
 static UIColor *usernameLabelGray;
-static UIColor *commentLabelGray;
+//static UIColor *commentLabelGray;
+//static UIColor *commentLabelOrange;
 static UIColor *linkColor;
 static NSParagraphStyle *paragraphStyle;
 
@@ -50,7 +51,8 @@ static NSParagraphStyle *paragraphStyle;
     lightFont = [UIFont fontWithName:@"HelveticaNeue-Thin" size:11];
     boldFont = [UIFont fontWithName:@"HelveticaNeue-Bold" size:11];
     usernameLabelGray = [UIColor colorWithRed:0.933 green:0.933 blue:0.933 alpha:1]; /*#eeeeee*/
-    commentLabelGray = [UIColor colorWithRed:0.898 green:0.898 blue:0.898 alpha:1]; /*#e5e5e5*/
+//    commentLabelGray = [UIColor colorWithRed:0.898 green:0.898 blue:0.898 alpha:1]; /*#e5e5e5*/
+//    commentLabelOrange = [UIColor colorWithRed:1.0 green:0.5 blue:0.0 alpha:1];
     linkColor = [UIColor colorWithRed:0.345 green:0.314 blue:0.427 alpha:1]; /*#58506d*/
     
     NSMutableParagraphStyle *mutableParagraphStyle = [[NSMutableParagraphStyle alloc] init];
@@ -74,11 +76,13 @@ static NSParagraphStyle *paragraphStyle;
         
         self.commentLabel = [[UILabel alloc] init];
         self.commentLabel.numberOfLines = 0;
-        self.commentLabel.backgroundColor = commentLabelGray;
+        //self.commentLabel.backgroundColor = commentLabelGray;
         
         for (UIView *view in @[self.mediaImageView, self.usernameAndCaptionLabel, self.commentLabel]) {
+
             [self.contentView addSubview:view];
         }
+        
     }
     return self;
 }

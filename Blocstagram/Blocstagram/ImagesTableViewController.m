@@ -51,14 +51,7 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     MediaTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"mediaCell" forIndexPath:indexPath];
-    if ([indexPath row] == 0) {
-        
-        cell.backgroundColor = [UIColor colorWithRed:1.0 green:0.5 blue:0.0 alpha:1];
-        cell.mediaItem = [DataSource sharedInstance].mediaItems[indexPath.row];
-    } else {
-        
-        cell.mediaItem = [DataSource sharedInstance].mediaItems[indexPath.row];
-    }
+    cell.mediaItem = [DataSource sharedInstance].mediaItems[indexPath.row];
     
     return cell;
 }
