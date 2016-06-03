@@ -75,6 +75,7 @@
                         
                     } else {//If not, it gets the initial data from the server
                         [self populateDataWithParameters:nil completionHandler:nil];
+                        [self requestNewItemsWithCompletionHandler:<#^(NSError *error)completionHandler#>]
                     }
                     //Now the token will be saved and restored
                 });
