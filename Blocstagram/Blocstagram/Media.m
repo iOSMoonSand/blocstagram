@@ -65,6 +65,7 @@
         self.image = [aDecoder decodeObjectForKey:NSStringFromSelector(@selector(image))];
         
         //set self.downloadState. This way, after relaunching the app, saved media items will still have a download state.
+        //Instead of encoding and decoding self.downloadState like we do with the other properties, we're determining the download state based on the presence of self.image and self.mediaURL. This way, all stored media items with missing images will be retried at least once the following time the app launches.
         if (self.image) {
             self.downloadState = MediaDownloadStateHasImage;
         } else if (self.mediaURL) {
