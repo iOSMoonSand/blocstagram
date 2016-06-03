@@ -32,46 +32,81 @@
 
 @implementation DataSource
 
-- (NSString *) pathForFilename:(NSString *) filename {
-    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths firstObject];
-    NSString *dataPath = [documentsDirectory stringByAppendingPathComponent:filename];
-    return dataPath;
+
+#pragma mark - init & singleton
+#pragma mark
+
++ (instancetype) sharedInstance {
+    static dispatch_once_t once;
+    static id sharedInstance;
+    dispatch_once(&once, ^{
+        sharedInstance = [[self alloc] init];
+    });
+    return sharedInstance;
 }
+
+- (instancetype) init {
+    self = [super init];
+    
+    if (self) {
+        self.accessToken = [UICKeyChainStore stringForKey:@"access token"];
+        
+        if (!self.accessToken) {//if token doesn't exist, register token
+            [self registerForAccessTokenNotification];
+        } else {//if token exists, jump straight to data population
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                //This read code is the inverse of the write code. It tries to find the file at the path and convert it into an array.
+                NSString *fullPath = [self pathForFilename:NSStringFromSelector(@selector(mediaItems))];
+                NSArray *storedMediaItems = [NSKeyedUnarchiver unarchiveObjectWithFile:fullPath];
+                
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    //If it finds an array of at least one item, it displays it immediately. (We make a mutableCopy since the copy stored to disk is immutable.)
+                    if (storedMediaItems.count > 0) {
+                        NSMutableArray *mutableMediaItems = [storedMediaItems mutableCopy];
+                        
+                        [self willChangeValueForKey:@"mediaItems"];
+                        self.mediaItems = mutableMediaItems;
+                        [self didChangeValueForKey:@"mediaItems"];
+                        
+                        //Since the image download happens in a different queue, the download may not finish by the time the files are saved. If this happens, the image property will be nil when they're unarchived. To account for this, we'll re-download any images for Media objects with a nil image. (Remember that downloadImageForMediaItem: will ignore any media items which already have images attached.)
+                        for (Media* mediaItem in self.mediaItems) {
+                            [self downloadImageForMediaItem:mediaItem];
+                        }
+                        
+                    } else {//If not, it gets the initial data from the server
+                        [self populateDataWithParameters:nil completionHandler:nil];
+                    }
+                    //Now the token will be saved and restored
+                });
+            });
+        }
+    }
+    
+    return self;
+}
+
+
+
+#pragma mark - instagram authentication
+#pragma mark
 
 + (NSString *) instagramClientID {
     return @"48e7832219ab46a7897b545e205bbe7b";
 }
 
-- (void) downloadImageForMediaItem:(Media *)mediaItem {
-    if (mediaItem.mediaURL && !mediaItem.image) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSURLRequest *request = [NSURLRequest requestWithURL:mediaItem.mediaURL];
-            
-            NSURLResponse *response;
-            NSError *error;
-            NSData *imageData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
-            
-            if (imageData) {
-                UIImage *image = [UIImage imageWithData:imageData];
-                
-                if (image) {
-                    mediaItem.image = image;
-                    
-                    dispatch_async(dispatch_get_main_queue(), ^{
-                        NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
-                        NSUInteger index = [mutableArrayWithKVO indexOfObject:mediaItem];
-                        [mutableArrayWithKVO replaceObjectAtIndex:index withObject:mediaItem];
-                        
-                        [self saveImages];
-                    });
-                }
-            } else {
-                NSLog(@"Error downloading image: %@", error);
-            }
-        });
-    }
+- (void) registerForAccessTokenNotification {
+    [[NSNotificationCenter defaultCenter] addObserverForName:LoginViewControllerDidGetAccessTokenNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
+        self.accessToken = note.object;
+        [UICKeyChainStore setString:self.accessToken forKey:@"access token"];//save the token
+        
+        // Got a token; populate the initial data
+        [self populateDataWithParameters:nil completionHandler:nil];
+    }];
 }
+
+
+#pragma mark - data populate, parse, download
+#pragma mark
 
 - (void) populateDataWithParameters:(NSDictionary *)parameters completionHandler:(NewItemCompletionBlock)completionHandler {
     if (self.accessToken) {
@@ -166,30 +201,39 @@
     [self saveImages];
 }
 
-- (void) saveImages {
-    
-    if (self.mediaItems.count > 0) {
-        // Write the changes to disk
+- (void) downloadImageForMediaItem:(Media *)mediaItem {
+    if (mediaItem.mediaURL && !mediaItem.image) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSUInteger numberOfItemsToSave = MIN(self.mediaItems.count, 50);
-            NSArray *mediaItemsToSave = [self.mediaItems subarrayWithRange:NSMakeRange(0, numberOfItemsToSave)];
+            NSURLRequest *request = [NSURLRequest requestWithURL:mediaItem.mediaURL];
             
-            NSString *fullPath = [self pathForFilename:NSStringFromSelector(@selector(mediaItems))];
-            NSData *mediaItemData = [NSKeyedArchiver archivedDataWithRootObject:mediaItemsToSave];
+            NSURLResponse *response;
+            NSError *error;
+            NSData *imageData = [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:&error];
             
-            NSError *dataError;
-            BOOL wroteSuccessfully = [mediaItemData writeToFile:fullPath options:NSDataWritingAtomic | NSDataWritingFileProtectionCompleteUnlessOpen error:&dataError];
-            
-            if (!wroteSuccessfully) {
-                NSLog(@"Couldn't write file: %@", dataError);
+            if (imageData) {
+                UIImage *image = [UIImage imageWithData:imageData];
+                
+                if (image) {
+                    mediaItem.image = image;
+                    
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
+                        NSUInteger index = [mutableArrayWithKVO indexOfObject:mediaItem];
+                        [mutableArrayWithKVO replaceObjectAtIndex:index withObject:mediaItem];
+                        
+                        [self saveImages];
+                    });
+                }
+            } else {
+                NSLog(@"Error downloading image: %@", error);
             }
         });
-        
     }
 }
 
+
 #pragma mark - Key/Value Observing
-// getter methods
+#pragma mark
 
 - (NSUInteger) countOfMediaItems {
     return self.mediaItems.count;
@@ -202,8 +246,6 @@
 - (NSArray *) mediaItemsAtIndexes:(NSIndexSet *)indexes {
     return [self.mediaItems objectsAtIndexes:indexes];
 }
-
-//setter methods
 
 - (void) insertObject:(Media *)object inMediaItemsAtIndex:(NSUInteger)index {
     [_mediaItems insertObject:object atIndex:index];
@@ -222,7 +264,9 @@
     [mutableArrayWithKVO removeObject:item];
 }
 
-#pragma mark - completion handling
+
+#pragma mark - completion handling: refresh & infinite scroll
+#pragma mark
 
 - (void) requestNewItemsWithCompletionHandler:(NewItemCompletionBlock)completionHandler {
     
@@ -248,8 +292,6 @@
         }
 }
 
-#pragma mark - infinite scroll
-
 - (void) requestOldItemsWithCompletionHandler:(NewItemCompletionBlock)completionHandler {
     if (self.isLoadingOlderItems == NO && self.thereAreNoMoreOlderMessages == NO) {
 
@@ -272,61 +314,45 @@
 }
 
 
-#pragma mark -
+#pragma mark - data persistence
+#pragma mark
 
-+ (instancetype) sharedInstance {
-    static dispatch_once_t once;
-    static id sharedInstance;
-    dispatch_once(&once, ^{
-        sharedInstance = [[self alloc] init];
-    });
-    return sharedInstance;
+//method to create the full path to a file given a filename
+//This code will create a string containing an absolute path to the user's documents directory (like /somedir/someotherdir/filename)
+- (NSString *) pathForFilename:(NSString *) filename {
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths firstObject];
+    NSString *dataPath = [documentsDirectory stringByAppendingPathComponent:filename];
+    return dataPath;
 }
 
-- (instancetype) init {
-    self = [super init];
+//write to the file that points to the user's documents directory
+- (void) saveImages {
     
-    if (self) {
-        self.accessToken = [UICKeyChainStore stringForKey:@"access token"];
+    if (self.mediaItems.count > 0) {
+        // Write the changes to disk
+        //Just like connecting to the Internet, reading or writing to disk can be slow. It's best to dispatch_async onto a background queue to do the file work you need.
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            //after we're on a background queue, we make an NSArray containing the first 50 or fewer items (so we don't flood the user's hard drive)
+            NSUInteger numberOfItemsToSave = MIN(self.mediaItems.count, 50);
+            NSArray *mediaItemsToSave = [self.mediaItems subarrayWithRange:NSMakeRange(0, numberOfItemsToSave)];
+            
+            //convert this array into an NSData and save it to disk
+            NSString *fullPath = [self pathForFilename:NSStringFromSelector(@selector(mediaItems))];
+            NSData *mediaItemData = [NSKeyedArchiver archivedDataWithRootObject:mediaItemsToSave];
+            
+            NSError *dataError;
+            //NSDataWritingAtomic ensures a complete file is saved. Without it, we might corrupt our file if the app crashes while writing to disk.
+            //NSDataWritingFileProtectionCompleteUnlessOpen encrypts the data. This helps protect the user's privacy.
+            BOOL wroteSuccessfully = [mediaItemData writeToFile:fullPath options:NSDataWritingAtomic | NSDataWritingFileProtectionCompleteUnlessOpen error:&dataError];
+            
+            if (!wroteSuccessfully) {
+                NSLog(@"Couldn't write file: %@", dataError);
+            }
+        });
         
-        if (!self.accessToken) {
-            [self registerForAccessTokenNotification];
-        } else {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-                NSString *fullPath = [self pathForFilename:NSStringFromSelector(@selector(mediaItems))];
-                NSArray *storedMediaItems = [NSKeyedUnarchiver unarchiveObjectWithFile:fullPath];
-                
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    if (storedMediaItems.count > 0) {
-                        NSMutableArray *mutableMediaItems = [storedMediaItems mutableCopy];
-                        
-                        [self willChangeValueForKey:@"mediaItems"];
-                        self.mediaItems = mutableMediaItems;
-                        [self didChangeValueForKey:@"mediaItems"];
-                        
-                        for (Media* mediaItem in self.mediaItems) {
-                            [self downloadImageForMediaItem:mediaItem];
-                        }
-                        
-                    } else {
-                        [self populateDataWithParameters:nil completionHandler:nil];
-                    }
-                });
-            });
-        }
     }
-    
-    return self;
 }
 
-- (void) registerForAccessTokenNotification {
-    [[NSNotificationCenter defaultCenter] addObserverForName:LoginViewControllerDidGetAccessTokenNotification object:nil queue:nil usingBlock:^(NSNotification *note) {
-        self.accessToken = note.object;
-        [UICKeyChainStore setString:self.accessToken forKey:@"access token"];
-        
-        // Got a token; populate the initial data
-        [self populateDataWithParameters:nil completionHandler:nil];
-    }];
-}
 
 @end
