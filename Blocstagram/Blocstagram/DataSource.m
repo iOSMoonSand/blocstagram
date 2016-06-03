@@ -54,6 +54,7 @@
         if (!self.accessToken) {//if token doesn't exist, register token
             [self registerForAccessTokenNotification];
         } else {//if token exists, jump straight to data population
+            //put the requestNewItemsWithCompletionHandler: in this success bloc
             dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
                 //This read code is the inverse of the write code. It tries to find the file at the path and convert it into an array.
                 NSString *fullPath = [self pathForFilename:NSStringFromSelector(@selector(mediaItems))];
@@ -71,11 +72,12 @@
                         //Since the image download happens in a different queue, the download may not finish by the time the files are saved. If this happens, the image property will be nil when they're unarchived. To account for this, we'll re-download any images for Media objects with a nil image. (Remember that downloadImageForMediaItem: will ignore any media items which already have images attached.)
                         for (Media* mediaItem in self.mediaItems) {
                             [self downloadImageForMediaItem:mediaItem];
+                            [self requestNewItemsWithCompletionHandler:nil];
                         }
+                        
                         
                     } else {//If not, it gets the initial data from the server
                         [self populateDataWithParameters:nil completionHandler:nil];
-                        [self requestNewItemsWithCompletionHandler:<#^(NSError *error)completionHandler#>]
                     }
                     //Now the token will be saved and restored
                 });
@@ -289,7 +291,7 @@
             if (completionHandler) {
                 completionHandler(error);
             }
-        }];   completionHandler(nil);
+        }];   //completionHandler(nil);
         }
 }
 
