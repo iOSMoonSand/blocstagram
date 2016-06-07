@@ -14,7 +14,7 @@
 #import "MediaTableViewCell.h"
 #import "MediaFullScreenViewController.h"
 
-@interface ImagesTableViewController () <MediaTableViewCellDelegate>
+@interface ImagesTableViewController () <MediaTableViewCellDelegate, UIScrollViewDelegate>
 
 @end
 
@@ -186,6 +186,29 @@
 // #4
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
     [self infiniteScrollIfNecessary];
+    NSLog(@"scrolling");
+}
+
+- (void)scrollViewWillBeginDecelerating:(UIScrollView *)scrollView {
+    
+    //fires when finger touches up off the screen and view begins decelaration
+    NSLog(@"now decelerating");
+        
+    [self downloadImagesForVisibleItem];
+
+}
+
+- (void) downloadImagesForVisibleItem {
+    
+    Media *mediaItem = [[Media alloc] init];
+    
+    NSIndexPath *bottomIndexPath = [[self.tableView indexPathsForVisibleRows] lastObject];
+    
+    if (bottomIndexPath && bottomIndexPath.row == [DataSource sharedInstance].mediaItems.count - 1) {
+        // The very last cell is on screen
+        [[DataSource sharedInstance] downloadImageForMediaItem:mediaItem];
+    }
+    
 }
 
 
