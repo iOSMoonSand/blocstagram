@@ -45,7 +45,7 @@
 }
 
 
-#pragma mark - tableViewDataSource methods
+#pragma mark - UITableViewDataSource & UI TableViewDataSource methods
 #pragma mark
 
 //required method
@@ -70,12 +70,16 @@
     
     Media *item = [DataSource sharedInstance].mediaItems[indexPath.row];
     
+    CGFloat sixHundred;
+    
     if(item) {
         
-        [MediaTableViewCell heightForMediaItem:item width:CGRectGetWidth(self.view.frame)];
+        return [MediaTableViewCell heightForMediaItem:item width:CGRectGetWidth(self.view.frame)];
+        
+    } else if (!item) {
+        
+        sixHundred = 600;
     }
-    
-    CGFloat sixHundred = 600;
     
     return sixHundred;
 }
@@ -105,6 +109,12 @@
 - (void) tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     Media *mediaItem = [DataSource sharedInstance].mediaItems[indexPath.row];
     if (mediaItem.downloadState == MediaDownloadStateNeedsImage) {
+        
+//        CGFloat sixHundred;
+//        sixHundred = 600;
+        
+        
+        
         [[DataSource sharedInstance] downloadImageForMediaItem:mediaItem];
     }
 }
