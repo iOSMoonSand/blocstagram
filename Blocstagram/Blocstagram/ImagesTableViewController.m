@@ -45,7 +45,7 @@
 }
 
 
-#pragma mark - tableViewDataSource methods
+#pragma mark - UITableViewDataSource & UITableViewDelegate methods
 #pragma mark
 
 //required method
@@ -91,6 +91,14 @@
         return 350;
     } else {
         return 150;
+    }
+}
+
+//Instead of downloading all the images as we get the media items, we'll check whether we need the images right before a cell displays. In the images table controller, implement tableView:willDisplayCell:forRowAtIndexPath:. According to the UITableViewDelegate Protocol Reference, a table view “sends this message to its delegate just before it uses cell to draw a row.”
+- (void) tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
+    Media *mediaItem = [DataSource sharedInstance].mediaItems[indexPath.row];
+    if (mediaItem.downloadState == MediaDownloadStateNeedsImage) {
+        [[DataSource sharedInstance] downloadImageForMediaItem:mediaItem];
     }
 }
 
@@ -199,14 +207,6 @@
     }
 }
 
-//Instead of downloading all the images as we get the media items, we'll check whether we need the images right before a cell displays. In the images table controller, implement tableView:willDisplayCell:forRowAtIndexPath:. According to the UITableViewDelegate Protocol Reference, a table view “sends this message to its delegate just before it uses cell to draw a row.”
-- (void) tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
-    Media *mediaItem = [DataSource sharedInstance].mediaItems[indexPath.row];
-    if (mediaItem.downloadState == MediaDownloadStateNeedsImage) {
-        [[DataSource sharedInstance] downloadImageForMediaItem:mediaItem];
-    }
-}
-
 -(void)displayShareActivityViewWithItemsToShare:(NSMutableArray *)itemsToShare onViewController:(UIViewController *)viewController {
 
     UIActivityViewController *activityVC = [[UIActivityViewController alloc] initWithActivityItems:itemsToShare applicationActivities:nil];
@@ -237,7 +237,9 @@
 
 
 
-#pragma mark - FullScreenVCDelegate
+
+
+
 
 /*
  
@@ -249,7 +251,6 @@
  }
  
  */
-
 
 
 

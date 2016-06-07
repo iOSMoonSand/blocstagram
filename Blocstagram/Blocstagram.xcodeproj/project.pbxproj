@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		3C01D7316B4E94EE78BC2540 /* libPods-Blocstagram.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F35CE69ECED02A4A2C89C51B /* libPods-Blocstagram.a */; };
+		5E1A5A1C1D0736CD005D8F89 /* CircleSpinnerView.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E1A5A1B1D0736CD005D8F89 /* CircleSpinnerView.m */; };
+		5E1A5A1F1D075D9C005D8F89 /* LikeButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 5E1A5A1E1D075D9C005D8F89 /* LikeButton.m */; };
 		5EA681631CEF6654007136CA /* MediaTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EA681621CEF6654007136CA /* MediaTableViewCell.m */; };
 		5EA681661CF0001D007136CA /* LoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EA681651CF0001D007136CA /* LoginViewController.m */; };
 		5EB682641CF574150028A3BE /* MediaFullScreenViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EB682631CF574150028A3BE /* MediaFullScreenViewController.m */; };
@@ -33,6 +35,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5E1A5A1A1D0736CD005D8F89 /* CircleSpinnerView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CircleSpinnerView.h; sourceTree = "<group>"; };
+		5E1A5A1B1D0736CD005D8F89 /* CircleSpinnerView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CircleSpinnerView.m; sourceTree = "<group>"; };
+		5E1A5A1D1D075D9C005D8F89 /* LikeButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LikeButton.h; sourceTree = "<group>"; };
+		5E1A5A1E1D075D9C005D8F89 /* LikeButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LikeButton.m; sourceTree = "<group>"; };
 		5EA681611CEF6654007136CA /* MediaTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaTableViewCell.h; sourceTree = "<group>"; };
 		5EA681621CEF6654007136CA /* MediaTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediaTableViewCell.m; sourceTree = "<group>"; };
 		5EA681641CF0001D007136CA /* LoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoginViewController.h; sourceTree = "<group>"; };
@@ -104,7 +110,6 @@
 		5EF241791CED20DF003EA782 /* Blocstagram */ = {
 			isa = PBXGroup;
 			children = (
-				5EF241911CED22E8003EA782 /* Images */,
 				5EF2417D1CED20E0003EA782 /* AppDelegate.h */,
 				5EF2417E1CED20E0003EA782 /* AppDelegate.m */,
 				5EF241AD1CED271B003EA782 /* ImagesTableViewController.h */,
@@ -123,7 +128,12 @@
 				5EA681651CF0001D007136CA /* LoginViewController.m */,
 				5EB682621CF574150028A3BE /* MediaFullScreenViewController.h */,
 				5EB682631CF574150028A3BE /* MediaFullScreenViewController.m */,
+				5E1A5A1A1D0736CD005D8F89 /* CircleSpinnerView.h */,
+				5E1A5A1B1D0736CD005D8F89 /* CircleSpinnerView.m */,
+				5E1A5A1D1D075D9C005D8F89 /* LikeButton.h */,
+				5E1A5A1E1D075D9C005D8F89 /* LikeButton.m */,
 				5EF241861CED20E0003EA782 /* Assets.xcassets */,
+				5EF241911CED22E8003EA782 /* Images */,
 				5EF241881CED20E0003EA782 /* LaunchScreen.storyboard */,
 				5EF2418B1CED20E0003EA782 /* Info.plist */,
 				5EF2417A1CED20DF003EA782 /* Supporting Files */,
@@ -304,12 +314,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				5EB682641CF574150028A3BE /* MediaFullScreenViewController.m in Sources */,
+				5E1A5A1C1D0736CD005D8F89 /* CircleSpinnerView.m in Sources */,
 				5EF241B21CEE76AC003EA782 /* User.m in Sources */,
 				5EF241B81CEE78C5003EA782 /* Comment.m in Sources */,
 				5EA681631CEF6654007136CA /* MediaTableViewCell.m in Sources */,
 				5EF241B51CEE7747003EA782 /* Media.m in Sources */,
 				5EF241AF1CED271B003EA782 /* ImagesTableViewController.m in Sources */,
 				5EA681661CF0001D007136CA /* LoginViewController.m in Sources */,
+				5E1A5A1F1D075D9C005D8F89 /* LikeButton.m in Sources */,
 				5EF241BB1CEE7975003EA782 /* DataSource.m in Sources */,
 				5EF2417F1CED20E0003EA782 /* AppDelegate.m in Sources */,
 				5EF2417C1CED20E0003EA782 /* main.m in Sources */,
