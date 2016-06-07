@@ -70,18 +70,14 @@
     
     Media *item = [DataSource sharedInstance].mediaItems[indexPath.row];
     
-    CGFloat sixHundred;
-    
-    if(item) {
+    if (item.downloadState == MediaDownloadStateNeedsImage) {
         
-        return [MediaTableViewCell heightForMediaItem:item width:CGRectGetWidth(self.view.frame)];
+        CGFloat sixHundred = 600;
         
-    } else if (!item) {
-        
-        sixHundred = 600;
+        return sixHundred;
     }
-    
-    return sixHundred;
+        
+    return [MediaTableViewCell heightForMediaItem:item width:CGRectGetWidth(self.view.frame)];
 }
 
 
@@ -112,8 +108,6 @@
         
 //        CGFloat sixHundred;
 //        sixHundred = 600;
-        
-        
         
         [[DataSource sharedInstance] downloadImageForMediaItem:mediaItem];
     }
