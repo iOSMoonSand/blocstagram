@@ -21,7 +21,7 @@
 
 @interface ComposeCommentView : UIView
 
-@property (nonatomic, weak) NSObject <ComposeCommentViewDelegate> *delegate;
+@property (nonatomic, weak) NSObject <ComposeCommentViewDelegate> *delegate;//the object of the ComposeCommentView class has a delegate of type NSObject and must conform to the <ComposeCommentViewDelegate> protocol
 @property (nonatomic, assign) BOOL isWritingComment;//determines whether the user is currently editing a comment
 @property (nonatomic, strong) NSString *text;//contains the text of the comment, and will allow an external controller to set text
 

@@ -11,8 +11,9 @@
 #import "Comment.h"
 #import "User.h"
 #import "LikeButton.h"
+#import "ComposeCommentView.h"
 
-@interface MediaTableViewCell () <UIGestureRecognizerDelegate>
+@interface MediaTableViewCell () <UIGestureRecognizerDelegate, ComposeCommentViewDelegate>
 
 //mediaItem elements
 @property (nonatomic, strong) UIImageView *mediaImageView;
@@ -27,6 +28,8 @@
 @property (nonatomic, strong) UILongPressGestureRecognizer *longPressGestureRecognizer;
 
 @property (nonatomic, strong) LikeButton *likeButton;
+
+@property (nonatomic, strong) ComposeCommentView *commentView;
 
 @end
 
@@ -94,15 +97,17 @@ static NSParagraphStyle *paragraphStyle;
         [self.likeButton addTarget:self action:@selector(likePressed:) forControlEvents:UIControlEventTouchUpInside];
         self.likeButton.backgroundColor = usernameLabelGray;
         
+        self.commentView = [[ComposeCommentView alloc] init];
+        self.commentView.delegate = self;
+        
         //add subviews to the table view cell's view herarchy
-        for (UIView *view in @[self.mediaImageView, self.usernameAndCaptionLabel, self.commentLabel, self.likeButton]) {
+        for (UIView *view in @[self.mediaImageView, self.usernameAndCaptionLabel, self.commentLabel, self.likeButton, self.commentView]) {
             [self.contentView addSubview:view];
             view.translatesAutoresizingMaskIntoConstraints = NO;
         }
         
         //NSDictionaryOfVariableBindings is particularly useful when creating Autolayout constraints
-        NSDictionary *viewDictionary = NSDictionaryOfVariableBindings(_mediaImageView, _usernameAndCaptionLabel, _commentLabel, _likeButton);
-        
+        NSDictionary *viewDictionary = NSDictionaryOfVariableBindings(_mediaImageView, _usernameAndCaptionLabel, _commentLabel, _likeButton, _commentView);
         [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_mediaImageView]|"
                                                                                  options:kNilOptions
                                                                                  metrics:nil
@@ -118,7 +123,12 @@ static NSParagraphStyle *paragraphStyle;
                                                                                  metrics:nil
                                                                                    views:viewDictionary]];
         
-        [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_mediaImageView][_usernameAndCaptionLabel][_commentLabel]"
+        [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_commentView]|"
+                                                                                 options:kNilOptions
+                                                                                 metrics:nil
+                                                                                   views:viewDictionary]];
+        
+        [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_mediaImageView][_usernameAndCaptionLabel][_commentLabel][_commentView(==100)]"
                                                                                  options:kNilOptions
                                                                                  metrics:nil
                                                                                    views:viewDictionary]];
@@ -193,7 +203,7 @@ static NSParagraphStyle *paragraphStyle;
     [layoutCell layoutIfNeeded];
     
     // Get the actual height required for the cell
-    return CGRectGetMaxY(layoutCell.commentLabel.frame);
+    return CGRectGetMaxY(layoutCell.commentView.frame);
 }
 
 - (void) setMediaItem:(Media *)mediaItem {
@@ -202,6 +212,7 @@ static NSParagraphStyle *paragraphStyle;
     self.usernameAndCaptionLabel.attributedText = [self usernameAndCaptionString];//see method below
     self.commentLabel.attributedText = [self commentString];//see method below
     self.likeButton.likeButtonState = mediaItem.likeState;
+    self.commentView.text = mediaItem.temporaryComment;
 }
 
 - (NSAttributedString *) usernameAndCaptionString {
@@ -288,6 +299,29 @@ static NSParagraphStyle *paragraphStyle;
     
     [self.delegate cellDidPressLikeButton:self];
     NSLog(@"like button fired");
+}
+
+
+#pragma mark - ComposeCommentViewDelegate
+#pragma mark
+
+//In both commentViewDidPressCommentButton: and commentViewWillStartEditing:, the cell tells its delegate (the images table controller) that a comment was composed or that the user began editing
+- (void) commentViewDidPressCommentButton:(ComposeCommentView *)sender {
+    [self.delegate cell:self didComposeComment:self.mediaItem.temporaryComment];
+}
+
+//we store the text written so far in temporaryComment. This allows a user to scroll up and down the table without losing any partially written comments
+- (void) commentView:(ComposeCommentView *)sender textDidChange:(NSString *)text {
+    self.mediaItem.temporaryComment = text;
+}
+
+- (void) commentViewWillStartEditing:(ComposeCommentView *)sender {
+    [self.delegate cellWillStartComposingComment:self];
+}
+
+//If another object tells the cell to stopComposingComment, the cell passes that message to the comment view. This will allow the cell's view controller to dismiss the keyboard by passing a message to the comment editor through the cell.
+- (void) stopComposingComment {
+    [self.commentView stopComposingComment];
 }
 
 
