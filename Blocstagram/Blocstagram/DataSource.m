@@ -103,6 +103,41 @@
 }
 
 
+#pragma mark - Key/Value Observe & Response methods
+#pragma mark
+
+//observe methods
+- (NSUInteger) countOfMediaItems {
+    return self.mediaItems.count;
+}
+
+- (id) objectInMediaItemsAtIndex:(NSUInteger)index {
+    return [self.mediaItems objectAtIndex:index];
+}
+
+- (NSArray *) mediaItemsAtIndexes:(NSIndexSet *)indexes {
+    return [self.mediaItems objectsAtIndexes:indexes];
+}
+
+//response methods
+- (void) insertObject:(Media *)object inMediaItemsAtIndex:(NSUInteger)index {
+    [_mediaItems insertObject:object atIndex:index];
+}
+
+- (void) removeObjectFromMediaItemsAtIndex:(NSUInteger)index {
+    [_mediaItems removeObjectAtIndex:index];
+}
+
+- (void) replaceObjectInMediaItemsAtIndex:(NSUInteger)index withObject:(id)object {
+    [_mediaItems replaceObjectAtIndex:index withObject:object];
+}
+
+- (void) deleteMediaItem:(Media *)item {
+    NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
+    [mutableArrayWithKVO removeObject:item];
+}
+
+
 #pragma mark - DataSource JSON parse, populate, download images
 #pragma mark
 
@@ -224,38 +259,49 @@
 }
 
 
-#pragma mark - Key/Value Observe & Response methods
+#pragma mark - Liking Media Items
 #pragma mark
 
-//observe methods
-- (NSUInteger) countOfMediaItems {
-    return self.mediaItems.count;
-}
-
-- (id) objectInMediaItemsAtIndex:(NSUInteger)index {
-    return [self.mediaItems objectAtIndex:index];
-}
-
-- (NSArray *) mediaItemsAtIndexes:(NSIndexSet *)indexes {
-    return [self.mediaItems objectsAtIndexes:indexes];
-}
-
-//response methods
-- (void) insertObject:(Media *)object inMediaItemsAtIndex:(NSUInteger)index {
-    [_mediaItems insertObject:object atIndex:index];
-}
-
-- (void) removeObjectFromMediaItemsAtIndex:(NSUInteger)index {
-    [_mediaItems removeObjectAtIndex:index];
-}
-
-- (void) replaceObjectInMediaItemsAtIndex:(NSUInteger)index withObject:(id)object {
-    [_mediaItems replaceObjectAtIndex:index withObject:object];
-}
-
-- (void) deleteMediaItem:(Media *)item {
-    NSMutableArray *mutableArrayWithKVO = [self mutableArrayValueForKey:@"mediaItems"];
-    [mutableArrayWithKVO removeObject:item];
+- (void) toggleLikeOnMediaItem:(Media *)mediaItem withCompletionHandler:(void (^)(void))completionHandler {
+    NSString *urlString = [NSString stringWithFormat:@"media/%@/likes", mediaItem.idNumber];
+    NSDictionary *parameters = @{@"access_token": self.accessToken};
+    
+    if (mediaItem.likeState == LikeStateNotLiked) {
+        
+        mediaItem.likeState = LikeStateLiking;
+        
+        [self.instagramOperationManager POST:urlString parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            mediaItem.likeState = LikeStateLiked;
+            
+            if (completionHandler) {
+                completionHandler();
+            }
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            mediaItem.likeState = LikeStateNotLiked;
+            
+            if (completionHandler) {
+                completionHandler();
+            }
+        }];
+        
+    } else if (mediaItem.likeState == LikeStateLiked) {
+        
+        mediaItem.likeState = LikeStateUnliking;
+        
+        [self.instagramOperationManager DELETE:urlString parameters:parameters success:^(AFHTTPRequestOperation *operation, id responseObject) {
+            mediaItem.likeState = LikeStateNotLiked;
+            
+            if (completionHandler) {
+                completionHandler();
+            }
+        } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+            mediaItem.likeState = LikeStateLiked;
+            
+            if (completionHandler) {
+                completionHandler();
+            }
+        }];
+    }
 }
 
 #pragma mark - Completion Handling Refresh & Infinite Scroll

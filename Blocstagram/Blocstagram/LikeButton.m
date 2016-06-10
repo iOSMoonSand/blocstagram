@@ -44,13 +44,13 @@
     return self;
 }
 
-//spinner view's frame should be updated whenever the button's frame changes
+//spinner view's frame should be updated in accordance to the button's frame change
 - (void) layoutSubviews {
     [super layoutSubviews];
     self.spinnerView.frame = self.imageView.frame;
 }
 
-//Update the button's appearance based on the set state
+//Accessor method: update the button's appearance based on the set state
 //This setter updates the button's image and userInteractionEnabled property depending on the LikeState passed in. It also shows or hides the spinner view as appropriate.
 - (void) setLikeButtonState:(LikeState)likeState {
     _likeButtonState = likeState;

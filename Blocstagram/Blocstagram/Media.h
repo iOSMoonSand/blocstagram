@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import "LikeButton.h" //so that LikeState, the list of possible states, is defined
+
 //declare an enumerationtrack which media items have been downloaded, and which still need to be downloaded
 typedef NS_ENUM(NSInteger, MediaDownloadState) {
     MediaDownloadStateNeedsImage             = 0,
@@ -28,6 +30,8 @@ typedef NS_ENUM(NSInteger, MediaDownloadState) {
 
 @property (nonatomic, strong) NSString *caption;
 @property (nonatomic, strong) NSArray *comments;
+
+@property (nonatomic, assign) LikeState likeState;
 
 - (instancetype) initWithDictionary:(NSDictionary *)mediaDictionary;
 

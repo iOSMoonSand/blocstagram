@@ -30,4 +30,7 @@ typedef void (^NewItemCompletionBlock)(NSError *error);
 //We want other classes to be able to request that images be downloaded so we make this method public in .h
 - (void) downloadImageForMediaItem:(Media *)mediaItem;
 
+//tell Instagram about the change, update the Media object, call completion handler when finished
+- (void) toggleLikeOnMediaItem:(Media *)mediaItem withCompletionHandler:(void (^)(void))completionHandler;
+
 @end

@@ -18,7 +18,7 @@
 
 //We'll create circleLayer by overriding the getter, and creating it the first time it's called. (This is called lazy instantiation.)
 - (CAShapeLayer*)circleLayer {
-    if(!_circleLayer) {
+    if(!_circleLayer) {//if circleLayer doesn't exist we override it's getter
         //calculates a CGPoint representing the center of the arc. (In our case, the arc is an entire circle.)
         CGPoint arcCenter = CGPointMake(self.radius+self.strokeThickness/2+5, self.radius+self.strokeThickness/2+5);
         //arcCenter is used to construct a CGRect. The spinning circle will fit inside this rect.
