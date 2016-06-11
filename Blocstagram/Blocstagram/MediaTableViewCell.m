@@ -107,8 +107,12 @@ static NSParagraphStyle *paragraphStyle;
         }
         
         //NSDictionaryOfVariableBindings is particularly useful when creating Autolayout constraints
+        
+        
+        
         NSDictionary *viewDictionary = NSDictionaryOfVariableBindings(_mediaImageView, _usernameAndCaptionLabel, _commentLabel, _likeButton, _commentView);
-        [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_mediaImageView]|"
+        
+        [NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_mediaImageView]|"
                                                                                  options:kNilOptions
                                                                                  metrics:nil
                                                                                    views:viewDictionary]];
@@ -124,14 +128,19 @@ static NSParagraphStyle *paragraphStyle;
         
         NSLayoutConstraint *commentLabelTop = [NSLayoutConstraint constraintWithItem:self.commentLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.usernameAndCaptionLabel attribute:NSLayoutAttributeBottom multiplier:1.0 constant:4.0];
         
-        NSLayoutConstraint *commentLabelBottom = [NSLayoutConstraint constraintWithItem:self.commentLabel attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.contentView attribute:NSLayoutAttributeBottom multiplier:1.0 constant:8.0];
+        NSLayoutConstraint *commentViewTop = [NSLayoutConstraint constraintWithItem:self.commentView attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.commentLabel attribute:NSLayoutAttributeBottom multiplier:1.0 constant:4.0];
         
-        [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_commentView]|"
-                                                                                 options:kNilOptions
-                                                                                 metrics:nil
-                                                                                   views:viewDictionary]];
+        NSLayoutConstraint *commentViewBottom = [NSLayoutConstraint constraintWithItem:self.commentView attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:self.contentView attribute:NSLayoutAttributeBottom multiplier:1.0 constant:8.0];
         
-        [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_mediaImageView][_usernameAndCaptionLabel][_commentLabel][_commentView(==100)]"
+        //_____________________
+        //  mediaImageView
+        
+        //usernameandcaption
+        // commentLabel
+        //___________________
+        //___
+        
+        [NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_commentLabel]|"
                                                                                  options:kNilOptions
                                                                                  metrics:nil
                                                                                    views:viewDictionary]];
@@ -169,7 +178,13 @@ static NSParagraphStyle *paragraphStyle;
                                                                           constant:100];
         self.commentLabelHeightConstraint.identifier = @"Comment label height constraint";
         
-        [NSLayoutConstraint activateConstraints:@[mediaImageViewTop, usernameAndCaptionTop, commentLabelTop, commentLabelBottom, self.imageHeightConstraint, self.usernameAndCaptionLabelHeightConstraint, self.commentLabelHeightConstraint]];
+        [NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_commentView]|" options:kNilOptions metrics:nil views:viewDictionary]];
+        
+//        [NSLayoutConstraint activateConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_mediaImageView][_usernameAndCaptionLabel][_commentLabel][_commentView(==100)]" options:kNilOptions
+//                                                                                 metrics:nil
+//                                                                                   views:viewDictionary]];
+        
+        [NSLayoutConstraint activateConstraints:@[mediaImageViewTop, usernameAndCaptionTop, commentLabelTop, commentViewTop, commentViewBottom, self.imageHeightConstraint, self.usernameAndCaptionLabelHeightConstraint, self.commentLabelHeightConstraint]];
         
         //[self.contentView addConstraints:@[self.imageHeightConstraint, self.usernameAndCaptionLabelHeightConstraint, self.commentLabelHeightConstraint]];
         
@@ -217,7 +232,8 @@ static NSParagraphStyle *paragraphStyle;
     [layoutCell layoutIfNeeded];
     
     // Get the actual height required for the cell
-    return CGRectGetMaxY(layoutCell.commentView.frame);
+    NSLog(@"return of heightForMediaItem: %f", CGRectGetMaxY(layoutCell.commentLabel.frame));
+    return CGRectGetMaxY(layoutCell.commentLabel.frame);
 }
 
 - (void) setMediaItem:(Media *)mediaItem {

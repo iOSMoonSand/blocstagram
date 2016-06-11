@@ -86,7 +86,7 @@
     Media *item = [DataSource sharedInstance].mediaItems[indexPath.row];
     NSLog(@"heightForRowAtIndexPath: %f", [MediaTableViewCell heightForMediaItem:item width:CGRectGetWidth(self.view.frame)]);
     //return [MediaTableViewCell heightForMediaItem:item width:CGRectGetWidth(self.view.frame)];
-    return 500;
+    return 700;
 }
 
 
