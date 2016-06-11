@@ -42,6 +42,8 @@
     [self.refreshControl addTarget:self action:@selector(refreshControlDidFire:) forControlEvents:UIControlEventValueChanged];
     
     [self.tableView registerClass:[MediaTableViewCell class] forCellReuseIdentifier:@"mediaCell"];
+    self.tableView.estimatedRowHeight = 200.0;
+    self.tableView.rowHeight = UITableViewAutomaticDimension;
 }
 
 
@@ -66,12 +68,12 @@
 }
 
 //optional method
-- (CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
-    Media *item = [DataSource sharedInstance].mediaItems[indexPath.row];
-    
-    return [MediaTableViewCell heightForMediaItem:item width:CGRectGetWidth(self.view.frame)];
-}
+//- (CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
+//    
+//    Media *item = [DataSource sharedInstance].mediaItems[indexPath.row];
+//    
+//    return [MediaTableViewCell heightForMediaItem:item width:CGRectGetWidth(self.view.frame)];
+//}
 
 
 //optional method
@@ -84,15 +86,15 @@
     }
 }
 
-//optional method
-- (CGFloat) tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    Media *item = [DataSource sharedInstance].mediaItems[indexPath.row];
-    if (item.image) {
-        return 350;
-    } else {
-        return 150;
-    }
-}
+////optional method
+//- (CGFloat) tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath {
+//    Media *item = [DataSource sharedInstance].mediaItems[indexPath.row];
+//    if (item.image) {
+//        return 350;
+//    } else {
+//        return 150;
+//    }
+//}
 
 //Instead of downloading all the images as we get the media items, we'll check whether we need the images right before a cell displays. In the images table controller, implement tableView:willDisplayCell:forRowAtIndexPath:. According to the UITableViewDelegate Protocol Reference, a table view “sends this message to its delegate just before it uses cell to draw a row.”
 - (void) tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
