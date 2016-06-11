@@ -84,8 +84,9 @@
 - (CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     Media *item = [DataSource sharedInstance].mediaItems[indexPath.row];
-    
-    return [MediaTableViewCell heightForMediaItem:item width:CGRectGetWidth(self.view.frame)];
+    NSLog(@"heightForRowAtIndexPath: %f", [MediaTableViewCell heightForMediaItem:item width:CGRectGetWidth(self.view.frame)]);
+    //return [MediaTableViewCell heightForMediaItem:item width:CGRectGetWidth(self.view.frame)];
+    return 500;
 }
 
 
@@ -99,7 +100,7 @@
     }
 }
 
-//optional method
+////optional method
 - (CGFloat) tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath {
     Media *item = [DataSource sharedInstance].mediaItems[indexPath.row];
     if (item.image) {
