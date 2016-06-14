@@ -10,6 +10,21 @@
 
 @implementation UIImage (ImageUtilities)
 
+- (UIImage *) imageByScalingToSize:(CGSize)size andCroppingWithRect:(CGRect)rect {
+    
+    [self imageWithFixedOrientation];
+    
+    [self imageResizedToMatchAspectRatioOfSize:size];
+    
+    CGRect cropRect = rect;
+    cropRect.origin.x = (CGRectGetMinX(rect) + (self.size.width - CGRectGetWidth(rect)) / 2);
+    
+    [self imageCroppedToRect:cropRect];
+
+
+    return self;
+}
+
 //inspects the image's imageOrientation property and uses this information to flip or rotate the image as necessary
 - (UIImage *) imageWithFixedOrientation {
     // Do nothing if the orientation is already correct

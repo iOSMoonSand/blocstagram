@@ -295,11 +295,8 @@
             NSData *imageData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageSampleBuffer];
             UIImage *image = [UIImage imageWithData:imageData scale:[UIScreen mainScreen].scale];
             
-            // #11 fix the image's orientation and resize it
-            image = [image imageWithFixedOrientation];
-            image = [image imageResizedToMatchAspectRatioOfSize:self.captureVideoPreviewLayer.bounds.size];
+            CGSize captureVideoPreviewLayerSize = self.captureVideoPreviewLayer.bounds.size;
             
-            // #12 calculate and center the white square's rect (cropRect). We pass that to the final UIImage category method to crop the image
             UIView *leftLine = self.verticalLines.firstObject;
             UIView *rightLine = self.verticalLines.lastObject;
             UIView *topLine = self.horizontalLines.firstObject;
@@ -309,12 +306,10 @@
                                          CGRectGetMinY(topLine.frame),
                                          CGRectGetMaxX(rightLine.frame) - CGRectGetMinX(leftLine.frame),
                                          CGRectGetMinY(bottomLine.frame) - CGRectGetMinY(topLine.frame));
+
             
-            CGRect cropRect = gridRect;
-            cropRect.origin.x = (CGRectGetMinX(gridRect) + (image.size.width - CGRectGetWidth(gridRect)) / 2);
-            
-            image = [image imageCroppedToRect:cropRect];
-            
+            image = [image imageByScalingToSize:captureVideoPreviewLayerSize andCroppingWithRect:gridRect];
+
             // #13 Once it's cropped, we call the delegate method with the image. The camera button should now capture the correct image
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.delegate cameraViewController:self didCompleteWithImage:image];
