@@ -7,14 +7,20 @@
 //
 
 #import "ImagesTableViewController.h"
+
 #import "DataSource.h"
+
 #import "Media.h"
 #import "User.h"
 #import "Comment.h"
+
 #import "MediaTableViewCell.h"
+
 #import "MediaFullScreenViewController.h"
 
-@interface ImagesTableViewController () <MediaTableViewCellDelegate, MediaFullScreenViewControllerDelegate>
+#import "CameraViewController.h"
+
+@interface ImagesTableViewController () <MediaTableViewCellDelegate, MediaFullScreenViewControllerDelegate, CameraViewControllerDelegate>
 
 @property (nonatomic, weak) UIView *lastSelectedCommentView;
 @property (nonatomic, assign) CGFloat lastKeyboardAdjustment;
@@ -47,6 +53,13 @@
     [self.tableView registerClass:[MediaTableViewCell class] forCellReuseIdentifier:@"mediaCell"];
     
     self.tableView.keyboardDismissMode = UIScrollViewKeyboardDismissModeInteractive;
+    
+    //check if any photo capabilities at all are available, and if so, add a camera button. (The camera button won't appear in the simulator.)
+    if ([UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeCamera] ||
+        [UIImagePickerController isSourceTypeAvailable:UIImagePickerControllerSourceTypeSavedPhotosAlbum]) {
+        UIBarButtonItem *cameraButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCamera target:self action:@selector(cameraPressed:)];
+        self.navigationItem.rightBarButtonItem = cameraButton;
+    }
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(keyboardWillShow:)
@@ -122,6 +135,30 @@
 - (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     MediaTableViewCell *cell = (MediaTableViewCell *)[tableView cellForRowAtIndexPath:indexPath];
     [cell stopComposingComment];
+}
+
+
+#pragma mark - Camera and CameraViewControllerDelegate
+#pragma mark
+
+//When the button is pressed, present the view controller within a navigation controller
+- (void) cameraPressed:(UIBarButtonItem *) sender {
+    CameraViewController *cameraVC = [[CameraViewController alloc] init];
+    cameraVC.delegate = self;
+    UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:cameraVC];
+    [self presentViewController:nav animated:YES completion:nil];
+    return;
+}
+
+//dismiss it with a note when the delegate method is called
+- (void) cameraViewController:(CameraViewController *)cameraViewController didCompleteWithImage:(UIImage *)image {
+    [cameraViewController dismissViewControllerAnimated:YES completion:^{
+        if (image) {
+            NSLog(@"Got an image!");
+        } else {
+            NSLog(@"Closed without an image.");
+        }
+    }];
 }
 
 
