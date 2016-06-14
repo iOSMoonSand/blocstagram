@@ -11,15 +11,13 @@
 
 @interface MediaFullScreenViewController () <UIScrollViewDelegate>
 
-@property (nonatomic, strong) Media *media; //property to store Media items
-
-#pragma mark - add01
 @property (nonatomic, strong) UIButton *shareButton;
 
 @end
 
-@implementation MediaFullScreenViewController
 
+
+@implementation MediaFullScreenViewController
 
 #pragma mark - view load and init
 #pragma mark
@@ -47,7 +45,6 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    #pragma mark - add02
     self.edgesForExtendedLayout = UIRectEdgeNone;
     
     // #1 create and configure a scroll view, and add it as the only subview of self.view
@@ -92,9 +89,18 @@
     // #4 scroll view's frame is set to the view's bounds. This way, the scroll view will always take up all of the view's space.
     self.scrollView.frame = self.view.bounds;
     
+    [self recalculateZoomScale];
+}
+
+- (void) recalculateZoomScale {
+
     // #5 set the views' frames
     CGSize scrollViewFrameSize = self.scrollView.frame.size;
     CGSize scrollViewContentSize = self.scrollView.contentSize;
+    
+    //divide the size dimensions by self.scrollView.zoomScale. This allows subclasses to recalculate the zoom scale for scroll views that are zoomed out
+    scrollViewContentSize.height /= self.scrollView.zoomScale;
+    scrollViewContentSize.width /= self.scrollView.zoomScale;
     
     CGFloat scaleWidth = scrollViewFrameSize.width / scrollViewContentSize.width;
     CGFloat scaleHeight = scrollViewFrameSize.height / scrollViewContentSize.height;
