@@ -23,8 +23,8 @@
 @property (nonatomic, strong) AVCaptureVideoPreviewLayer *captureVideoPreviewLayer;//special type of CALayer (AVCaptureVideoPreviewLayer) that displays video from a camera
 @property (nonatomic, strong) AVCaptureStillImageOutput *stillImageOutput;//captures still images from the capture session's input (camera)
 
-@property (nonatomic, strong) UIToolbar *topView;
-@property (nonatomic, strong) UIToolbar *bottomView;
+//@property (nonatomic, strong) UIToolbar *topView;
+//@property (nonatomic, strong) UIToolbar *bottomView;
 
 @property (nonatomic, strong) CameraToolbar *cameraToolbar;
 
@@ -52,23 +52,23 @@
 - (void) createViews {
     
     self.imagePreview = [UIView new];
-    self.topView = [UIToolbar new];
-    self.bottomView = [UIToolbar new];
+//    self.topView = [UIToolbar new];
+//    self.bottomView = [UIToolbar new];
     self.cropBox = [CropBox new];
     
     self.cameraToolbar = [[CameraToolbar alloc] initWithImageNames:@[@"rotate", @"road"]];
     self.cameraToolbar.delegate = self;
     
-    UIColor *whiteBG = [UIColor colorWithWhite:1.0 alpha:.15];
-    self.topView.barTintColor = whiteBG;
-    self.bottomView.barTintColor = whiteBG;
-    self.topView.alpha = 0.5;
-    self.bottomView.alpha = 0.5;
+//    UIColor *whiteBG = [UIColor colorWithWhite:1.0 alpha:.15];
+//    self.topView.barTintColor = whiteBG;
+//    self.bottomView.barTintColor = whiteBG;
+//    self.topView.alpha = 0.5;
+//    self.bottomView.alpha = 0.5;
 }
 
 - (void) addViewsToViewHierarchy {
     
-    NSMutableArray *views = [@[self.imagePreview, self.cropBox, self.topView, self.bottomView] mutableCopy];
+    NSMutableArray *views = [@[self.imagePreview, self.cropBox/*, self.topView, self.bottomView*/] mutableCopy];
     
     [views addObject:self.cameraToolbar];
     
@@ -97,14 +97,14 @@
     [super viewWillLayoutSubviews];
     
     CGFloat width = CGRectGetWidth(self.view.bounds);
-    self.topView.frame = CGRectMake(0, self.topLayoutGuide.length, width, 44);
-    
-    CGFloat yOriginOfBottomView = CGRectGetMaxY(self.topView.frame) + width;
-    CGFloat heightOfBottomView = CGRectGetHeight(self.view.frame) - yOriginOfBottomView;
-    self.bottomView.frame = CGRectMake(0, yOriginOfBottomView, width, heightOfBottomView);
-    
-    //Position the crop box
-    self.cropBox.frame = CGRectMake(0, CGRectGetMaxY(self.topView.frame), width, width);
+//    self.topView.frame = CGRectMake(0, self.topLayoutGuide.length, width, 44);
+//    
+//    CGFloat yOriginOfBottomView = CGRectGetMaxY(self.topView.frame) + width;
+//    CGFloat heightOfBottomView = CGRectGetHeight(self.view.frame) - yOriginOfBottomView;
+//    self.bottomView.frame = CGRectMake(0, yOriginOfBottomView, width, heightOfBottomView);
+//    
+//    //Position the crop box
+//    self.cropBox.frame = CGRectMake(0, CGRectGetMaxY(self.topView.frame), width, width);
     
     self.imagePreview.frame = self.view.bounds;
     self.captureVideoPreviewLayer.frame = self.imagePreview.bounds;
