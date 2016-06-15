@@ -7,8 +7,9 @@
 //
 
 #import "PostToInstagramViewController.h"
+#import "FilterCollectionViewCell.h"
 
-@interface PostToInstagramViewController () <UICollectionViewDataSource, UICollectionViewDelegate, UIDocumentInteractionControllerDelegate>
+@interface PostToInstagramViewController () <UICollectionViewDataSource, UICollectionViewDelegate, UIDocumentInteractionControllerDelegate, FilterCollectionViewCellDelegate>
 
 @property (nonatomic, strong) UIImage *sourceImage;//stores the image passed into initWithImage:
 @property (nonatomic, strong) UIImageView *previewImageView;//displays the image with its current filter
@@ -92,7 +93,7 @@
         self.navigationItem.rightBarButtonItem = self.sendBarButton;
     }
 #pragma mark - 01 potential cell
-    [self.filterCollectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
+    [self.filterCollectionView registerClass:[FilterCollectionViewCell class] forCellWithReuseIdentifier:@"customFilterCell"];
     
     self.view.backgroundColor = [UIColor whiteColor];
     self.filterCollectionView.backgroundColor = [UIColor whiteColor];
@@ -219,38 +220,38 @@
 
 #pragma mark - 02 cell
 //When the cell loads, we'll make sure there's an image view and a label on it, and we'll set their content from the appropriate arrays
-- (UICollectionViewCell*) collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
-    UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
+- (FilterCollectionViewCell*) collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    FilterCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"customFilterCell" forIndexPath:indexPath];
     
-    static NSInteger imageViewTag = 1000;
-    static NSInteger labelTag = 1001;
+//    static NSInteger imageViewTag = 1000;
+//    static NSInteger labelTag = 1001;
     
-    UIImageView *thumbnail = (UIImageView *)[cell.contentView viewWithTag:imageViewTag];
-    UILabel *label = (UILabel *)[cell.contentView viewWithTag:labelTag];
+//    UIImageView *thumbnail = (UIImageView *)[cell.contentView viewWithTag:imageViewTag];
+//    UILabel *label = (UILabel *)[cell.contentView viewWithTag:labelTag];
     
     UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout *)self.filterCollectionView.collectionViewLayout;
     CGFloat thumbnailEdgeSize = flowLayout.itemSize.width;
     
     //We set the frames of these items based on the flow layout's itemSize property, which is set earlier in viewWillLayoutSubviews
-    if (!thumbnail) {
-        thumbnail = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, thumbnailEdgeSize, thumbnailEdgeSize)];
-        thumbnail.contentMode = UIViewContentModeScaleAspectFill;
-        thumbnail.tag = imageViewTag;
-        thumbnail.clipsToBounds = YES;
-        
-        [cell.contentView addSubview:thumbnail];
-    }
+//    if (!thumbnail) {
+//        thumbnail = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, thumbnailEdgeSize, thumbnailEdgeSize)];
+//        thumbnail.contentMode = UIViewContentModeScaleAspectFill;
+//        thumbnail.tag = imageViewTag;
+//        thumbnail.clipsToBounds = YES;
+//        
+//        [cell.contentView addSubview:thumbnail];
+//    }
+//    
+//    if (!label) {
+//        label = [[UILabel alloc] initWithFrame:CGRectMake(0, thumbnailEdgeSize, thumbnailEdgeSize, 20)];
+//        label.tag = labelTag;
+//        label.textAlignment = NSTextAlignmentCenter;
+//        label.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:10];
+//        [cell.contentView addSubview:label];
+//    }
     
-    if (!label) {
-        label = [[UILabel alloc] initWithFrame:CGRectMake(0, thumbnailEdgeSize, thumbnailEdgeSize, 20)];
-        label.tag = labelTag;
-        label.textAlignment = NSTextAlignmentCenter;
-        label.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:10];
-        [cell.contentView addSubview:label];
-    }
-    
-    thumbnail.image = self.filterImages[indexPath.row];
-    label.text = self.filterTitles[indexPath.row];
+    cell.thumbnail.image = self.filterImages[indexPath.row];
+    cell.label.text = self.filterTitles[indexPath.row];
     
     return cell;
 }
@@ -258,6 +259,17 @@
 //If the user taps on one of the cells, we'll update the preview image to show the image with that filter
 - (void) collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(NSIndexPath *)indexPath {
     self.previewImageView.image = self.filterImages[indexPath.row];
+}
+
+
+#pragma mark - FilterCollectionViewCellDelegate
+#pragma mark
+
+- (CGFloat) calculateEdgeSizeWithFlowLayout:(UICollectionViewFlowLayout *)flowLayout {
+    
+    CGFloat thumbnailEdgeSize = flowLayout.itemSize.width;
+    
+    return thumbnailEdgeSize;
 }
 
 
