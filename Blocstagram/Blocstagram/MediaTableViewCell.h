@@ -9,20 +9,14 @@
 #import <UIKit/UIKit.h>
 
 @class Media, MediaTableViewCell, ComposeCommentView;
-//define the new MediaTableViewCell protocol
 
 @protocol MediaTableViewCellDelegate <NSObject>
 
-//protocol's delegate method which will inform the cell's controller when the user taps on the image
 - (void) cell:(MediaTableViewCell *)cell didTapImageView:(UIImageView *)imageView;
-
-//protocol's delegate method to trigger a share sheet if the user long-presses on an image
 - (void) cell:(MediaTableViewCell *)cell didLongPressImageView:(UIImageView *)imageView;
 
-//indicates like button was pressed
 - (void)cellDidPressLikeButton:(MediaTableViewCell *)cell;
 
-//comment view
 - (void) cellWillStartComposingComment:(MediaTableViewCell *)cell;
 - (void) cell:(MediaTableViewCell *)cell didComposeComment:(NSString *)comment;
 
@@ -33,9 +27,10 @@
 @property (nonatomic, strong) Media *mediaItem;
 @property (nonatomic, weak) id <MediaTableViewCellDelegate> delegate;
 @property (nonatomic, strong, readonly) ComposeCommentView *commentView;
+@property (nonatomic, strong) UITraitCollection *overrideTraitCollection;
 
 
-+ (CGFloat) heightForMediaItem:(Media *)mediaItem width:(CGFloat)width;
++ (CGFloat) heightForMediaItem:(Media *)mediaItem width:(CGFloat)width traitCollection:(UITraitCollection *) traitCollection;
 
 - (void) stopComposingComment;
 

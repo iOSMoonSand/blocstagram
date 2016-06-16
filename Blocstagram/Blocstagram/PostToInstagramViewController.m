@@ -91,7 +91,7 @@
     } else {
         self.navigationItem.rightBarButtonItem = self.sendBarButton;
     }
-#pragma mark - 01 potential cell
+
     [self.filterCollectionView registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"cell"];
     
     self.view.backgroundColor = [UIColor whiteColor];
@@ -104,6 +104,10 @@
     [super viewWillLayoutSubviews];
     
     CGFloat edgeSize = MIN(CGRectGetWidth(self.view.frame), CGRectGetHeight(self.view.frame));
+    
+    if (CGRectGetHeight(self.view.bounds) < edgeSize * 1.5) {
+        edgeSize /= 1.5;
+    }
     
     self.previewImageView.frame = CGRectMake(0, self.topLayoutGuide.length, edgeSize, edgeSize);
     
@@ -217,7 +221,6 @@
     return self.filterImages.count;
 }
 
-#pragma mark - 02 cell
 //When the cell loads, we'll make sure there's an image view and a label on it, and we'll set their content from the appropriate arrays
 - (UICollectionViewCell*) collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     UICollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"cell" forIndexPath:indexPath];
