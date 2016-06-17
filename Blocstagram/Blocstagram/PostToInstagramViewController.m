@@ -223,32 +223,12 @@
 - (FilterCollectionViewCell*) collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
     FilterCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:@"customFilterCell" forIndexPath:indexPath];
     
-//    static NSInteger imageViewTag = 1000;
-//    static NSInteger labelTag = 1001;
-    
-//    UIImageView *thumbnail = (UIImageView *)[cell.contentView viewWithTag:imageViewTag];
-//    UILabel *label = (UILabel *)[cell.contentView viewWithTag:labelTag];
-    
+    cell.delegate = self;
+
     UICollectionViewFlowLayout *flowLayout = (UICollectionViewFlowLayout *)self.filterCollectionView.collectionViewLayout;
     CGFloat thumbnailEdgeSize = flowLayout.itemSize.width;
     
-    //We set the frames of these items based on the flow layout's itemSize property, which is set earlier in viewWillLayoutSubviews
-//    if (!thumbnail) {
-//        thumbnail = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, thumbnailEdgeSize, thumbnailEdgeSize)];
-//        thumbnail.contentMode = UIViewContentModeScaleAspectFill;
-//        thumbnail.tag = imageViewTag;
-//        thumbnail.clipsToBounds = YES;
-//        
-//        [cell.contentView addSubview:thumbnail];
-//    }
-//    
-//    if (!label) {
-//        label = [[UILabel alloc] initWithFrame:CGRectMake(0, thumbnailEdgeSize, thumbnailEdgeSize, 20)];
-//        label.tag = labelTag;
-//        label.textAlignment = NSTextAlignmentCenter;
-//        label.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:10];
-//        [cell.contentView addSubview:label];
-//    }
+    
     
     cell.thumbnail.image = self.filterImages[indexPath.row];
     cell.label.text = self.filterTitles[indexPath.row];

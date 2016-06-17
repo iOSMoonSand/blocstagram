@@ -16,16 +16,12 @@
     
     if (self) {
         
-        thumbnailEdgeSize = [thumbnailEdgeSize calculateEdgeSizeWithFlowLayout:flowLayout]
-        
-        self.thumbnail = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, thumbnailEdgeSize, thumbnailEdgeSize)];
+//        self.thumbnail = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, thumbnailEdgeSize, thumbnailEdgeSize)];
         self.thumbnail.contentMode = UIViewContentModeScaleAspectFill;
-        //self.thumbnail.tag = imageViewTag;
         self.thumbnail.clipsToBounds = YES;
         
         
-        self.label = [[UILabel alloc] initWithFrame:CGRectMake(0, thumbnailEdgeSize, thumbnailEdgeSize, 20)];
-        //self.label.tag = labelTag;
+//        self.label = [[UILabel alloc] initWithFrame:CGRectMake(0, thumbnailEdgeSize, thumbnailEdgeSize, 20)];
         self.label.textAlignment = NSTextAlignmentCenter;
         self.label.font = [UIFont fontWithName:@"HelveticaNeue-Medium" size:10];
         
