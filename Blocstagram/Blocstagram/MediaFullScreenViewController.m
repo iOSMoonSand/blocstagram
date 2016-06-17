@@ -8,8 +8,9 @@
 
 #import "MediaFullScreenViewController.h"
 #import "Media.h"
+#import "AppDelegate.h"
 
-@interface MediaFullScreenViewController () <UIScrollViewDelegate>
+@interface MediaFullScreenViewController () <UIScrollViewDelegate, UIGestureRecognizerDelegate>
 
 @property (nonatomic, strong) UIButton *shareButton;
 
@@ -59,7 +60,7 @@
     self.imageView.image = self.media.image;
     
     [self.scrollView addSubview:self.imageView];
-    #pragma mark - add04
+    
     self.shareButton = [UIButton buttonWithType:UIButtonTypeSystem];
     [self.shareButton setEnabled:YES];
     
@@ -73,13 +74,25 @@
     
     //initialize gesture recognizers
     self.tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapFired:)];
+    self.tap.delegate = self;
+#pragma mark - add 01
+    self.tap.cancelsTouchesInView = NO;
     
     self.doubleTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(doubleTapFired:)];
     self.doubleTap.numberOfTapsRequired = 2; //allows a tap gesture recognizer to require more than one tap to fire
     
     [self.tap requireGestureRecognizerToFail:self.doubleTap]; //allows one gesture recognizer to wait for another gesture recognizer to fail before it succeeds. Without this line, it would be impossible to double-tap because the single tap gesture recognizer would fire before the user had a chance to tap twice.
     
+    self.dismissalTap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(dismissalTapFired:)];
+    
+    AppDelegate *appDelegate = [[UIApplication sharedApplication] delegate];
+    
+    UIWindow* window = [appDelegate window];
+    self.dismissalTap.delegate = self;
+    self.dismissalTap.cancelsTouchesInView = NO;
     [self.scrollView addGestureRecognizer:self.tap];
+#pragma mark - add 02
+    [window addGestureRecognizer:self.dismissalTap];
     [self.scrollView addGestureRecognizer:self.doubleTap];
     
 }
@@ -111,7 +124,6 @@
     self.scrollView.minimumZoomScale = minScale;
     self.scrollView.maximumZoomScale = 1;
     
-    #pragma mark - add03
     static const CGFloat itemHeight = 60;
     CGFloat width = CGRectGetWidth(self.imageView.bounds);
     CGFloat buttonWidth = CGRectGetWidth(self.imageView.bounds) / 4;
@@ -168,7 +180,20 @@
 
 //When the user single-taps, simply dismiss the view controller
 - (void) tapFired:(UITapGestureRecognizer *)sender {
+    
     [self dismissViewControllerAnimated:YES completion:nil];
+    NSLog(@"TAP FIRED");
+//    
+//    CGPoint location = [sender locationInView:nil]; //Passing nil gives us coordinates in the window
+//    
+//    //Then we convert the tap's location into the local view's coordinate system, and test to see if it's in or outside. If outside, dismiss the view.
+//    
+//    if (![self.view pointInside:[self.view convertPoint:location fromView:self.view.window] withEvent:nil]) {
+//        
+//        // Remove the recognizer first so it's view.window is valid.
+//        [self.view.window removeGestureRecognizer:sender];
+//        [self dismissViewControllerAnimated:YES completion:nil];
+//    }
 }
 
 //When the user double-taps, adjust the zoom level
@@ -191,7 +216,11 @@
     }
 }
 
-
+- (void) dismissalTapFired:(UITapGestureRecognizer *)sender {
+    
+    [self dismissViewControllerAnimated:YES completion:nil];
+    NSLog(@"dismissal TAP FIRED");
+}
 
 //share button pressed
 - (IBAction)shareButtonFired:(id)sender {
@@ -201,6 +230,22 @@
 
 }
 
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
+    
+    NSLog(@"%@", gestureRecognizer);
+    NSLog(@"%@", otherGestureRecognizer);
+    
+    return YES;
+}
+
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+       shouldReceiveTouch:(UITouch *)touch {
+    
+    NSLog(@"%@", gestureRecognizer);
+    
+    return YES;
+}
 
 
 #pragma mark - Misc

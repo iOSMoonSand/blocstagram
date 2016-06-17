@@ -347,7 +347,6 @@ static NSParagraphStyle *paragraphStyle;
 //tap gesture method when user taps an the image view (zoom)
 - (void) tapFired:(UITapGestureRecognizer *)sender {
     [self.delegate cell:self didTapImageView:self.mediaImageView];
-    NSLog(@"tap fired");
 }
 
 //long press gesture method when user taps an the image view (share)
