@@ -21,7 +21,8 @@
 		5EB4D97B1D10C1F7003DB886 /* ImageLibraryViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EB4D97A1D10C1F7003DB886 /* ImageLibraryViewController.m */; };
 		5EB4D97E1D1100FD003DB886 /* PostToInstagramViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EB4D97D1D1100FD003DB886 /* PostToInstagramViewController.m */; };
 		5EB682641CF574150028A3BE /* MediaFullScreenViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EB682631CF574150028A3BE /* MediaFullScreenViewController.m */; };
-		5ECEB5E41D149FBD005496F9 /* BlocstagramTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ECEB5E31D149FBD005496F9 /* BlocstagramTests.m */; };
+		5ECEB5E41D149FBD005496F9 /* UserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ECEB5E31D149FBD005496F9 /* UserTests.m */; };
+		5ECEB5EC1D14A3B6005496F9 /* MediaTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 5ECEB5EB1D14A3B6005496F9 /* MediaTests.m */; };
 		5EF2417C1CED20E0003EA782 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EF2417B1CED20DF003EA782 /* main.m */; };
 		5EF2417F1CED20E0003EA782 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 5EF2417E1CED20E0003EA782 /* AppDelegate.m */; };
 		5EF241871CED20E0003EA782 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5EF241861CED20E0003EA782 /* Assets.xcassets */; };
@@ -81,8 +82,9 @@
 		5EB682621CF574150028A3BE /* MediaFullScreenViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MediaFullScreenViewController.h; sourceTree = "<group>"; };
 		5EB682631CF574150028A3BE /* MediaFullScreenViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediaFullScreenViewController.m; sourceTree = "<group>"; };
 		5ECEB5E11D149FBD005496F9 /* BlocstagramTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BlocstagramTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		5ECEB5E31D149FBD005496F9 /* BlocstagramTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BlocstagramTests.m; sourceTree = "<group>"; };
+		5ECEB5E31D149FBD005496F9 /* UserTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = UserTests.m; sourceTree = "<group>"; };
 		5ECEB5E51D149FBD005496F9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5ECEB5EB1D14A3B6005496F9 /* MediaTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MediaTests.m; sourceTree = "<group>"; };
 		5EF241771CED20DF003EA782 /* Blocstagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Blocstagram.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5EF2417B1CED20DF003EA782 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		5EF2417D1CED20E0003EA782 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -137,7 +139,8 @@
 		5ECEB5E21D149FBD005496F9 /* BlocstagramTests */ = {
 			isa = PBXGroup;
 			children = (
-				5ECEB5E31D149FBD005496F9 /* BlocstagramTests.m */,
+				5ECEB5EB1D14A3B6005496F9 /* MediaTests.m */,
+				5ECEB5E31D149FBD005496F9 /* UserTests.m */,
 				5ECEB5E51D149FBD005496F9 /* Info.plist */,
 			);
 			path = BlocstagramTests;
@@ -415,7 +418,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5ECEB5E41D149FBD005496F9 /* BlocstagramTests.m in Sources */,
+				5ECEB5EC1D14A3B6005496F9 /* MediaTests.m in Sources */,
+				5ECEB5E41D149FBD005496F9 /* UserTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -610,6 +614,7 @@
 				5ECEB5EA1D149FBD005496F9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5EF241721CED20DF003EA782 /* Build configuration list for PBXProject "Blocstagram" */ = {
 			isa = XCConfigurationList;
