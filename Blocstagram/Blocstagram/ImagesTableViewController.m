@@ -94,6 +94,7 @@
 //optional method
 - (CGFloat) tableView:(UITableView *)tableView estimatedHeightForRowAtIndexPath:(NSIndexPath *)indexPath {
     Media *item = [DataSource sharedInstance].mediaItems[indexPath.row];
+    
     if (item.image) {
         return 350;
     } else {
@@ -105,9 +106,6 @@
 - (void) tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath {
     Media *mediaItem = [DataSource sharedInstance].mediaItems[indexPath.row];
     if (mediaItem.downloadState == MediaDownloadStateNeedsImage) {
-        
-//        CGFloat sixHundred;
-//        sixHundred = 600;
         
         [[DataSource sharedInstance] downloadImageForMediaItem:mediaItem];
     }
