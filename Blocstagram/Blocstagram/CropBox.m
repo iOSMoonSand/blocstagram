@@ -94,15 +94,15 @@
     self.topView.alpha = 0.5;
     self.bottomView.alpha = 0.5;
 
-    CGFloat width = CGRectGetWidth(self.view.bounds);
-    self.topView.frame = CGRectMake(0, self.topLayoutGuide.length, width, 44);
-    
-    CGFloat yOriginOfBottomView = CGRectGetMaxY(self.topView.frame) + width;
-    CGFloat heightOfBottomView = CGRectGetHeight(self.view.frame) - yOriginOfBottomView;
-    self.bottomView.frame = CGRectMake(0, yOriginOfBottomView, width, heightOfBottomView);
-    
-    //Position the crop box
-    self.cropBox.frame = CGRectMake(0, CGRectGetMaxY(self.topView.frame), width, width);
+//    CGFloat width = CGRectGetWidth(self.view.bounds);
+//    self.topView.frame = CGRectMake(0, self.topLayoutGuide.length, width, 44);
+//    
+//    CGFloat yOriginOfBottomView = CGRectGetMaxY(self.topView.frame) + width;
+//    CGFloat heightOfBottomView = CGRectGetHeight(self.view.frame) - yOriginOfBottomView;
+//    self.bottomView.frame = CGRectMake(0, yOriginOfBottomView, width, heightOfBottomView);
+//    
+//    //Position the crop box
+//    self.cropBox.frame = CGRectMake(0, CGRectGetMaxY(self.topView.frame), width, width);
 
 }
 
